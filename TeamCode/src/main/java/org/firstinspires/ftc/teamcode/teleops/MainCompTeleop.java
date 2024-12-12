@@ -72,10 +72,7 @@ public class MainCompTeleop extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
+
     private DcMotor slide = null;
     private DcMotorEx pivot = null;
 
@@ -83,16 +80,20 @@ public class MainCompTeleop extends LinearOpMode {
 
     double servoSetpoint = 0;
 
+    private Servo clawServo = null;
 
     private double pivotError;
-
-    private Servo clawServo = null;
 
     private enum arm_status {
         STOWED, // slide in, pivot down so we can drive around normally
         SCORING, // pivot
         INTAKING
     }
+
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
 
     @Override
     public void runOpMode() {
@@ -138,8 +139,6 @@ public class MainCompTeleop extends LinearOpMode {
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
-
-
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -158,6 +157,8 @@ public class MainCompTeleop extends LinearOpMode {
         runtime.reset();
 
         clawServo.setPosition(1);
+
+        wrist.setPosition(0);
 
 
         // run until the end of the match (driver presses STOP)
@@ -182,12 +183,9 @@ public class MainCompTeleop extends LinearOpMode {
         servoSetpoint =  servoSetpoint + (gamepad2.right_trigger - gamepad2.left_trigger) * 0.1;
 
         if (gamepad2.left_bumper) { //intake specimen
-            servoSetpoint = 0.47;
+            servoSetpoint = 0.4663;
         }
 
-        if (gamepad2.dpad_left) { //intake sample from ground - claw perpendicular to ground
-            servoSetpoint = 0; //SET TO CORRECT POSE
-        }
 
         servoSetpoint = Math.max(Math.min(servoSetpoint, 1), 0);
         telemetry.addData("servo setpoint: ", servoSetpoint);

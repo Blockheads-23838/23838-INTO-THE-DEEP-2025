@@ -212,7 +212,9 @@ public final class MecanumDrive {
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            if (module.isParent()) {
+                module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            }
         }
 
         // TODO: make sure your config has motors with these names (or change them)
