@@ -10,7 +10,7 @@ public  class Constants {
     //ticks
     // ------------ PIVOT -------------
     public static double pivot_intake_pose = 80; //encoder counts; lowest the arm should go
-    public static double pivot_high_pose = 3800; //encoder counts; highest the arm should go; high basket
+    public static double pivot_high_pose = 3400; //encoder counts; highest the arm should go; high basket
     public static double pivot_p = 0.1;
     public static double pivot_i = 0;
     public static double pivot_d = 0;

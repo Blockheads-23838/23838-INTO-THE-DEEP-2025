@@ -73,9 +73,9 @@ public final class MecanumDrive {
         public double kA = 0.0001;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 60;
-        public double minProfileAccel = -50;
-        public double maxProfileAccel = 60;
+        public double maxWheelVel = 80;//60;
+        public double minProfileAccel = -70;//-50;
+        public double maxProfileAccel = 80;//60
 
         // turn profile parameters (in radians)
         public double maxAngVel = Math.PI; // shared with path
@@ -86,9 +86,9 @@ public final class MecanumDrive {
         public double lateralGain = 13.0;
         public double headingGain = 3.0; // shared with turn
 
-        public double axialVelGain = 3.0;
-        public double lateralVelGain = 3.0;
-        public double headingVelGain = 1.0; // shared with turn
+        public double axialVelGain = 0.0;//3.0;
+        public double lateralVelGain = 0.0;//3.0;
+        public double headingVelGain = 0.0;//1.0; // shared with turn
     }
 
     public static Params PARAMS = new Params();
@@ -209,6 +209,7 @@ public final class MecanumDrive {
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
         this.pose = pose;
 
+        //FIX LYNX PROBLEMS
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {

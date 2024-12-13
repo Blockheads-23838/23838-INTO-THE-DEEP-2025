@@ -139,6 +139,7 @@ public class MainCompTeleop extends LinearOpMode {
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
+
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -146,6 +147,10 @@ public class MainCompTeleop extends LinearOpMode {
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        clawServo.setPosition(1);
+
+        wrist.setPosition(0);
 
         while (!isStarted() && !isStopRequested()) {
             //telemetry.addData("pivot position: ", pivot.getCurrentPosition());
@@ -156,9 +161,7 @@ public class MainCompTeleop extends LinearOpMode {
         }
         runtime.reset();
 
-        clawServo.setPosition(1);
 
-        wrist.setPosition(0);
 
 
         // run until the end of the match (driver presses STOP)
@@ -187,7 +190,7 @@ public class MainCompTeleop extends LinearOpMode {
         }
 
 
-        servoSetpoint = Math.max(Math.min(servoSetpoint, 1), 0);
+        servoSetpoint = Math.max(Math.min(servoSetpoint, 0.9), 0);
         telemetry.addData("servo setpoint: ", servoSetpoint);
         if (wrist.getPosition() != servoSetpoint) {
             wrist.setPosition(servoSetpoint);

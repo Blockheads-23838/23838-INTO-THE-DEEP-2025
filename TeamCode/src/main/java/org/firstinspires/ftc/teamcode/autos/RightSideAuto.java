@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.*;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
 import com.acmerobotics.roadrunner.DualNum;
 import com.acmerobotics.roadrunner.HolonomicController;
@@ -64,7 +65,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(name="right side auto", group="beta")
 public class RightSideAuto extends LinearOpMode {
-    MecanumDrive roadrunnerDrive = new MecanumDrive(hardwareMap, new Pose2d(9, -63, Math.toRadians(90)));
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -82,21 +82,6 @@ public class RightSideAuto extends LinearOpMode {
     //move robot 28 inches forward, score on high rung, open claw, bring slide back, move robot back, pivot down, then push 3 pieces in.
 
 
-    private void toSub() {
-        Action toSub = roadrunnerDrive.actionBuilder(new Pose2d(9, -63, Math.toRadians(90)))
-                .lineToY(-35)
-                .build();
-
-    }
-
-    private void toWall() {
-        Action toWall = roadrunnerDrive.actionBuilder(new Pose2d(9, -35, Math.toRadians(90)))
-                .lineToY(-63)
-                .build();
-
-    }
-
-
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -107,23 +92,57 @@ public class RightSideAuto extends LinearOpMode {
 
         clawServo = hardwareMap.get(Servo.class, "claw");
 
+        MecanumDrive roadrunnerDrive = new MecanumDrive(hardwareMap, new Pose2d(9, -63, Math.toRadians(90)));
+
+
         pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        pivot.setDirection(DcMotor.Direction.REVERSE);
+        slide.setDirection(DcMotor.Direction.REVERSE);
+
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        waitForStart();
+
         runtime.reset();
+
+        Action toSub = roadrunnerDrive.actionBuilder(new Pose2d(9, -63, Math.toRadians(90)))
+                .lineToY(-3)
+                .build();
+
+
+        Action toTicks = roadrunnerDrive.actionBuilder(new Pose2d(9, -3, Math.toRadians(90)))
+                .strafeTo(new Vector2d(63, -63))
+                .strafeTo(new Vector2d(63, 40))
+                .build();
+
+        //Action push3Strikes = roadrunnerDrive.actionBuilder(new Pose2d(9, -63, Math.toRadians(90))) -> INITIAL POSE IS WRONG!!
+                //move robot right, back, forward, right, back, forward, right, back, turn 180 degrees.
+                //.build();//build for now - need to add more
 
         //auto commands start here
         closeClaw();
-        toSub();
+        Actions.runBlocking(toSub);
         pivotUp();
         wristScoreSpecimen();
-        //slideOut();
-        toWall();
+        slideOut();
+        sleep(500);
+        openClaw();
+        slideIn();
+        Actions.runBlocking(toTicks);
+        pivotDown();
+
+        //Actions.runBlocking(push3Strikes);
 
         /*
         // run until the end of the match (driver presses STOP)
@@ -145,28 +164,34 @@ public class RightSideAuto extends LinearOpMode {
 
     }
 
-    private void handleWrist() {
 
-        servoSetpoint = Math.max(Math.min(servoSetpoint, 1), 0);
-        telemetry.addData("servo setpoint: ", servoSetpoint);
-        if (wrist.getPosition() != servoSetpoint) {
-            wrist.setPosition(servoSetpoint);
+
+    public void wristIntakeSpecimen() {
+       wrist.setPosition(0.4);
+    }
+
+    public void wristScoreSpecimen() {
+        wrist.setPosition(0.45);
+    }
+
+    public void slideIn() {
+        slide.setTargetPosition((int) Constants.slide_retracted_pose);
+        slide.setPower(1);
+        int r = 0;
+        while (slide.isBusy()) {
+            r = r*r + 1;
         }
     }
 
-    private void wristIntakeSpecimen() {
-        servoSetpoint = 0.4;
-    }
-
-    private void wristScoreSpecimen() {
-        servoSetpoint = 0.45;
-    }
-
-
-    private void slideOut() {
+    public void slideOut() {
         //slide.setPower(-gamepad2.right_stick_y * 1.5);
 
-        //TODO: IMPLEMENT PID HERE
+        slide.setTargetPosition((int) Constants.slide_specimen_high_rung);
+        slide.setPower(1);
+        int r = 0;
+        while (slide.isBusy()) {
+            r = r*r+1;
+        }
 
         /*
         if (gamepad2.dpad_up) {
@@ -189,29 +214,29 @@ public class RightSideAuto extends LinearOpMode {
          */
     }
 
-    private void openClaw() {
+    public void openClaw() {
         clawServo.setPosition(0.5);
     }
 
-    private void closeClaw() {
+    public void closeClaw() {
         clawServo.setPosition(1);
     }
 
     public void pivotUp() {
-        while (pivot.getCurrentPosition() < Constants.pivot_high_pose) {
-            pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            pivot.setTargetPosition((int) Constants.pivot_high_pose);
-            pivot.setPower(1);
+        pivot.setTargetPosition((int) Constants.pivot_high_pose);
+        pivot.setPower(1);
+        int r = 0;
+        while (pivot.isBusy()) {
+           r = r*r + 1;
         }
     }
 
-    private void pivotDown() {
-        while (pivot.getCurrentPosition() > Constants.pivot_intake_pose) {
-            pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            pivot.setTargetPosition((int) Constants.pivot_intake_pose);
-            pivot.setPower(1);
+    public void pivotDown() {
+        pivot.setTargetPosition((int) Constants.pivot_intake_pose);
+        pivot.setPower(1);
+        int r = 0;
+        while (pivot.isBusy()) {
+            r =r*r+1;
         }
     }
 
