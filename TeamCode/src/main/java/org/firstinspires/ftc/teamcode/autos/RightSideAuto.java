@@ -121,14 +121,23 @@ public class RightSideAuto extends LinearOpMode {
                 .build();
 
 
-        Action toTicks = roadrunnerDrive.actionBuilder(new Pose2d(9, -3, Math.toRadians(90)))
+        Action push3Ticks = roadrunnerDrive.actionBuilder(new Pose2d(9, -3, Math.toRadians(90)))
                 .strafeTo(new Vector2d(63, -63))
                 .strafeTo(new Vector2d(63, 40))
+                .strafeTo(new Vector2d(83, 40))
+                .strafeTo(new Vector2d(83, -58))
+                .strafeTo(new Vector2d(83, 40))
+                .strafeTo(new Vector2d(103, 40))
+                .strafeTo(new Vector2d(103, -50))
+                .splineToLinearHeading(new Pose2d(103, 40, Math.toRadians(-90)), Math.toRadians(90))
+                .setReversed(true)
+                .strafeTo(new Vector2d(120, 60))
+                .strafeTo(new Vector2d(120, -58))
+                //.strafeTo(new Vector2d(123, 60))
+
                 .build();
 
-        //Action push3Strikes = roadrunnerDrive.actionBuilder(new Pose2d(9, -63, Math.toRadians(90))) -> INITIAL POSE IS WRONG!!
-                //move robot right, back, forward, right, back, forward, right, back, turn 180 degrees.
-                //.build();//build for now - need to add more
+
 
         //auto commands start here
         closeClaw();
@@ -139,10 +148,9 @@ public class RightSideAuto extends LinearOpMode {
         sleep(500);
         openClaw();
         slideIn();
-        Actions.runBlocking(toTicks);
+        Actions.runBlocking(push3Ticks);
         pivotDown();
 
-        //Actions.runBlocking(push3Strikes);
 
         /*
         // run until the end of the match (driver presses STOP)
