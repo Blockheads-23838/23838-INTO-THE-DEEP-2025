@@ -80,6 +80,8 @@ public class MainCompTeleop extends LinearOpMode {
 
     double servoSetpoint = 0;
 
+    double pivotAfterAuto = 0;
+
     private Servo clawServo = null;
 
     private double pivotError;
@@ -260,16 +262,19 @@ public class MainCompTeleop extends LinearOpMode {
 
 
         //pivot.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(Constants.pivot_p, Constants.pivot_i, Constants.pivot_d, Constants.pivot_f));
+        if (gamepad2.y) {
+            pivotAfterAuto = Constants.pivot_high_pose;
+        }
 
         if (gamepad2.dpad_up) {
             pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            pivot.setTargetPosition((int) Constants.pivot_high_pose);
+            pivot.setTargetPosition(((int) Constants.pivot_high_pose) - (int)(pivotAfterAuto));
             pivot.setPower(1);
         } else if (gamepad2.dpad_down) {
             pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            pivot.setTargetPosition((int) Constants.pivot_intake_pose);
+            pivot.setTargetPosition(((int) Constants.pivot_intake_pose) - (int)(pivotAfterAuto));
             pivot.setPower(1);
 
         }
