@@ -4,13 +4,14 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public  class Constants {
-
     // ------------ FIELD -------------
     public static double length_of_block = 878;
     //ticks
     // ------------ PIVOT -------------
     public static double pivot_intake_pose = 80; //encoder counts; lowest the arm should go
-    public static double pivot_high_pose = 3400; //encoder counts; highest the arm should go; high basket
+    public static double pivot_high_pose = 3800; //encoder counts; highest the arm should go; high basket
+    public static double pivot_high_pose_auto_1 = 3500;//3480, 3430, 3400; //FOR AUTOS!!!
+    public static double pivot_high_pose_auto_2 = 3650; //3480, 3430; FOR AUTOS!!
     public static double pivot_p = 0.1;
     public static double pivot_i = 0;
     public static double pivot_d = 0;
@@ -31,6 +32,7 @@ public  class Constants {
     public static double slide_retracted_pose = 5; //encoder counts; minimum slide pose
     public static double slide_max_pose = 2600; //encoder counts; max slide pose
     public static double slide_specimen_high_rung = 1200;
+    public static double slide_specimen_high_rung_2 = 1350;
 
     public static double slide_trapezoidal_power(double slide_position, double sign) {
         if (slide_position < 900) {

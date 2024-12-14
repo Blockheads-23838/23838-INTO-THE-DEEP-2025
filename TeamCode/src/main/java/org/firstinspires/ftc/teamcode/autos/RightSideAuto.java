@@ -122,34 +122,61 @@ public class RightSideAuto extends LinearOpMode {
 
 
         Action push3Ticks = roadrunnerDrive.actionBuilder(new Pose2d(9, -3, Math.toRadians(90)))
-                .strafeTo(new Vector2d(63, -63))
+                .strafeTo(new Vector2d(63, -20))
                 .strafeTo(new Vector2d(63, 40))
                 .strafeTo(new Vector2d(83, 40))
-                .strafeTo(new Vector2d(83, -58))
+                .strafeTo(new Vector2d(83, -38))
                 .strafeTo(new Vector2d(83, 40))
                 .strafeTo(new Vector2d(103, 40))
-                .strafeTo(new Vector2d(103, -50))
-                .splineToLinearHeading(new Pose2d(103, 40, Math.toRadians(-90)), Math.toRadians(90))
+                .strafeTo(new Vector2d(103, -38))
+                .splineToLinearHeading(new Pose2d(80, 40, Math.toRadians(-90)), Math.toRadians(90))
                 .setReversed(true)
-                .strafeTo(new Vector2d(120, 60))
-                .strafeTo(new Vector2d(120, -58))
-                //.strafeTo(new Vector2d(123, 60))
+                .strafeTo(new Vector2d(117, 40))
+                .strafeTo(new Vector2d(117, -38))
 
                 .build();
 
+        Action secondSpec = roadrunnerDrive.actionBuilder(new Pose2d(117, -38, Math.toRadians(-90)))
+                .setReversed(true)
+                .strafeTo(new Vector2d(90, -48))
+                //diddy juices here: 3049029340923094
+                .strafeTo(new Vector2d(90, -62))
+                .build();
+
+        Action secondToSub = roadrunnerDrive.actionBuilder(new Pose2d(90, -62, Math.toRadians(-90)))
+                .setReversed(true)
+                .splineToLinearHeading(new Pose2d(-10, -13, Math.toRadians(90)), Math.toRadians(90))
+                .setReversed(false)
+                .strafeTo(new Vector2d(-10, -3))
+                .build();
 
 
         //auto commands start here
         closeClaw();
         Actions.runBlocking(toSub);
-        pivotUp();
-        wristScoreSpecimen();
-        slideOut();
-        sleep(500);
+        pivotUpOne();
+        wristScoreSpecimen1();
+        slideOutOne();
+        sleep(200);
         openClaw();
         slideIn();
         Actions.runBlocking(push3Ticks);
         pivotDown();
+
+        Actions.runBlocking(secondSpec);
+        wristIntakeSpecimen();
+        closeClaw();
+        sleep(400);
+        pivotUpTwo();
+        Actions.runBlocking(secondToSub);
+        wristScoreSpecimen2();
+        slideOutTwo();
+        sleep(200);
+        openClaw();
+        slideIn();
+        pivotDown();
+
+
 
 
         /*
@@ -178,8 +205,12 @@ public class RightSideAuto extends LinearOpMode {
        wrist.setPosition(0.4);
     }
 
-    public void wristScoreSpecimen() {
+    public void wristScoreSpecimen1() {
         wrist.setPosition(0.45);
+    }
+
+    public void wristScoreSpecimen2() {
+        wrist.setPosition(0.38);
     }
 
     public void slideIn() {
@@ -191,7 +222,7 @@ public class RightSideAuto extends LinearOpMode {
         }
     }
 
-    public void slideOut() {
+    public void slideOutOne() {
         //slide.setPower(-gamepad2.right_stick_y * 1.5);
 
         slide.setTargetPosition((int) Constants.slide_specimen_high_rung);
@@ -222,6 +253,18 @@ public class RightSideAuto extends LinearOpMode {
          */
     }
 
+    public void slideOutTwo() {
+        //slide.setPower(-gamepad2.right_stick_y * 1.5);
+
+        slide.setTargetPosition((int) Constants.slide_specimen_high_rung_2);
+        slide.setPower(1);
+        int r = 0;
+        while (slide.isBusy()) {
+            r = r * r + 1;
+        }
+
+    }
+
     public void openClaw() {
         clawServo.setPosition(0.5);
     }
@@ -230,12 +273,21 @@ public class RightSideAuto extends LinearOpMode {
         clawServo.setPosition(1);
     }
 
-    public void pivotUp() {
-        pivot.setTargetPosition((int) Constants.pivot_high_pose);
+    public void pivotUpOne() {
+        pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_1);
         pivot.setPower(1);
         int r = 0;
         while (pivot.isBusy()) {
            r = r*r + 1;
+        }
+    }
+
+    public void pivotUpTwo() {
+        pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_2);
+        pivot.setPower(1);
+        int r = 0;
+        while (pivot.isBusy()) {
+            r = r*r + 1;
         }
     }
 

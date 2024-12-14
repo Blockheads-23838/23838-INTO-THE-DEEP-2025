@@ -319,17 +319,17 @@ public class MainCompTeleop extends LinearOpMode {
 
         if(gamepad1.right_trigger > 0.5) {
             // Send calculated power to wheels
-            leftFrontDrive.setPower(leftFrontPower);
-            rightFrontDrive.setPower(rightFrontPower);
-            leftBackDrive.setPower(leftBackPower);
-            rightBackDrive.setPower(rightBackPower);
+            leftFrontDrive.setPower(leftFrontPower * 1.5);
+            rightFrontDrive.setPower(rightFrontPower * 1.5);
+            leftBackDrive.setPower(leftBackPower * 1.5);
+            rightBackDrive.setPower(rightBackPower * 1.5);
 
         }
         if(gamepad1.right_trigger <= 0.5) {
-            leftFrontDrive.setPower(leftFrontPower * 0.4);
-            rightFrontDrive.setPower(rightFrontPower * 0.4);
-            leftBackDrive.setPower(leftBackPower * 0.4);
-            rightBackDrive.setPower(rightBackPower * 0.4);
+            leftFrontDrive.setPower(leftFrontPower * 0.6);
+            rightFrontDrive.setPower(rightFrontPower * 0.6);
+            leftBackDrive.setPower(leftBackPower * 0.6);
+            rightBackDrive.setPower(rightBackPower * 0.6);
         }
 
         // Show the elapsed game time and wheel power.
