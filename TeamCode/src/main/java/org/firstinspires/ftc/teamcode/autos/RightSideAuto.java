@@ -122,32 +122,63 @@ public class RightSideAuto extends LinearOpMode {
 
 
         Action push3Ticks = roadrunnerDrive.actionBuilder(new Pose2d(9, -3, Math.toRadians(90)))
-                .strafeTo(new Vector2d(63, -20))
-                .strafeTo(new Vector2d(63, 40))
-                .strafeTo(new Vector2d(83, 40))
-                .strafeTo(new Vector2d(83, -38))
-                .strafeTo(new Vector2d(83, 40))
-                .strafeTo(new Vector2d(103, 40))
-                .strafeTo(new Vector2d(103, -38))
-                .splineToLinearHeading(new Pose2d(80, 40, Math.toRadians(-90)), Math.toRadians(90))
+                .lineToY(-5)
+                .splineToLinearHeading(new Pose2d(78, -17, Math.toRadians(-90)), Math.toRadians(90))
                 .setReversed(true)
-                .strafeTo(new Vector2d(117, 40))
+                //.strafeTo(new Vector2d(63, -20))
+                .strafeTo(new Vector2d(63, 43))
+                .strafeTo(new Vector2d(83, 43))
+                .strafeTo(new Vector2d(83, -38))
+                .strafeTo(new Vector2d(83, 43))
+                .strafeTo(new Vector2d(103, 43))
+                .strafeTo(new Vector2d(103, -38))
+                .strafeTo(new Vector2d(103, 43))
+                .strafeTo(new Vector2d(117, 43))
                 .strafeTo(new Vector2d(117, -38))
+                //.splineToLinearHeading(new Pose2d(80, 40, Math.toRadians(-90)), Math.toRadians(90))
+                //.setReversed(true)
+                //.strafeTo(new Vector2d(117, 40))
+                //.strafeTo(new Vector2d(117, -38))
 
                 .build();
 
         Action secondSpec = roadrunnerDrive.actionBuilder(new Pose2d(117, -38, Math.toRadians(-90)))
                 .setReversed(true)
-                .strafeTo(new Vector2d(90, -48))
-                //diddy juices here: 3049029340923094
-                .strafeTo(new Vector2d(90, -62))
+                .strafeTo(new Vector2d(90, -50))
+                .strafeTo(new Vector2d(90, -58.29))
+                //.splineToLinearHeading(new Pose2d(90, -60, Math.toRadians(-90)), Math.toRadians(90))
+                /*
+                .strafeTo(new Vector2d(110, -60))
+                .splineTo(new Vector2d(100, -50), Math.toRadians(90))
+                .splineTo(new Vector2d(90, -60), Math.toRadians(180))
+
+                 */
+                //.strafeTo(new Vector2d(90, -48))
+                //.strafeTo(new Vector2d(95, -60))
+                //.setReversed(true)
+                //.strafeTo(new Vector2d(90, -60))
                 .build();
 
-        Action secondToSub = roadrunnerDrive.actionBuilder(new Pose2d(90, -62, Math.toRadians(-90)))
+        Action secondToSub = roadrunnerDrive.actionBuilder(new Pose2d(90, -58.29, Math.toRadians(-90)))
                 .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-10, -13, Math.toRadians(90)), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(-10, -40, Math.toRadians(90)), Math.toRadians(-90))
                 .setReversed(false)
-                .strafeTo(new Vector2d(-10, -3))
+                .strafeTo(new Vector2d(-6, -3))
+                .build();
+
+        Action thirdSpec = roadrunnerDrive.actionBuilder(new Pose2d(-6, -3, Math.toRadians(90)))
+                .strafeTo(new Vector2d(-5, -15))
+                .splineToSplineHeading(new Pose2d(100, -40, Math.toRadians(-90)), Math.toRadians(90))
+                .setReversed(true)
+                .strafeTo(new Vector2d(90, -58.4))
+                //.splineToLinearHeading(new Pose2d(90, -60, Math.toRadians(-90)), Math.toRadians(90))
+                .build();
+
+        Action thirdToSub = roadrunnerDrive.actionBuilder(new Pose2d(90, -58.4, Math.toRadians(-90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-15, -40, Math.toRadians(90)), Math.toRadians(-90))
+                .setReversed(false)
+                .strafeTo(new Vector2d(-12, -3))
                 .build();
 
 
@@ -160,18 +191,30 @@ public class RightSideAuto extends LinearOpMode {
         sleep(200);
         openClaw();
         slideIn();
-        Actions.runBlocking(push3Ticks);
         pivotDown();
-
+        Actions.runBlocking(push3Ticks);
+        //pivotDown();
         Actions.runBlocking(secondSpec);
-        wristIntakeSpecimen();
+        //wristIntakeSpecimen();
         closeClaw();
-        sleep(400);
+        sleep(200);
         pivotUpTwo();
         Actions.runBlocking(secondToSub);
         wristScoreSpecimen2();
         slideOutTwo();
+        sleep(300);
+        openClaw();
+        slideIn();
+        pivotDown();
+        Actions.runBlocking(thirdSpec);
+        wristScoreSpecimen1(); //works better as an intake pose
+        closeClaw();
         sleep(200);
+        pivotUpTwo();
+        Actions.runBlocking(thirdToSub);
+        wristScoreSpecimen2();
+        slideOutTwo();
+        sleep(300);
         openClaw();
         slideIn();
         pivotDown();

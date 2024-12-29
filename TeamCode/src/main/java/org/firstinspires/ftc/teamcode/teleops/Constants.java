@@ -10,8 +10,8 @@ public  class Constants {
     // ------------ PIVOT -------------
     public static double pivot_intake_pose = 55;//30.680851, 80; //encoder counts; lowest the arm should go
     public static double pivot_high_pose = 1457.3404;//3800; //encoder counts; highest the arm should go; high basket
-    public static double pivot_high_pose_auto_1 = 1342.2872;//3500;//3480, 3430, 3400; //FOR AUTOS!!!
-    public static double pivot_high_pose_auto_2 = 1399.8138;//3650; //3480, 3430; FOR AUTOS!!
+    public static double pivot_high_pose_auto_1 = 1285.2872;//1342.2872; 3500;//3480, 3430, 3400; //FOR AUTOS!!!
+    public static double pivot_high_pose_auto_2 = 1350.8138;//3650; //3480, 3430; FOR AUTOS!!
     public static double pivot_after_auto_pose = pivot_intake_pose;
     public static double pivot_p = 0.1;
     public static double pivot_i = 0;
