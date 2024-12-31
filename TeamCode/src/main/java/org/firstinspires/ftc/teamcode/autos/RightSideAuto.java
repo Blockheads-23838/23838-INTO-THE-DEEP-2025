@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Config
 @Autonomous(name="right side auto", group="beta")
 public class RightSideAuto extends LinearOpMode {
-    /*
+
     public class Wrist {
         private Servo wristS;
 
@@ -39,8 +39,7 @@ public class RightSideAuto extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-
-                wristS.setPosition(0.4);
+                wristS.setPosition(0.6631);
                 return false;
             }
         }
@@ -49,44 +48,35 @@ public class RightSideAuto extends LinearOpMode {
             return new WristIntakeSpecimen();
         }
 
-        public class WristScoreSpecimen1 implements Action {
+        public class WristReadySpecimen implements Action {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-
-
-                wristS.setPosition(0.45);
+                wristS.setPosition(0.78);
                 return false;
             }
         }
 
-        public Action wristScoreSpecimen1() {
-            return new WristScoreSpecimen1();
+        public Action wristReadySpecimen() {
+            return new WristReadySpecimen();
         }
-        //public void wristIntakeSpecimen() {
-            //wrist.setPosition(0.4);
-        //}
 
-        //public void wristScoreSpecimen1() {
-            //wrist.setPosition(0.45);
-        //}
-
-        public class WristScoreSpecimen2 implements Action {
+        public class WristScoreSpecimen implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-
-                wristS.setPosition(0.38);
+                wristS.setPosition(0.96);
                 return false;
             }
         }
 
-        public Action wristScoreSpecimen2() {
-            return new WristScoreSpecimen2();
+        public Action wristScoreSpecimen() {
+            return new WristScoreSpecimen();
         }
+
 
     }
 
-     */
+
 
     public class Claw {
         private Servo clawServo;
@@ -144,11 +134,8 @@ public class RightSideAuto extends LinearOpMode {
                     initialized = true;
                 }
 
-                while (slide.isBusy()) {
-                    r = r*r + 1;
-                }
-
-                return true;
+                r = r*r + 1;
+                return slide.isBusy();
             }
         }
 
@@ -156,7 +143,7 @@ public class RightSideAuto extends LinearOpMode {
             return new SlideIn();
         }
 
-        public class SlideOutOne implements Action {
+        public class SlideOut implements Action {
             private boolean initialized = false;
             private int r = 0;
 
@@ -169,42 +156,15 @@ public class RightSideAuto extends LinearOpMode {
                     initialized = true;
                 }
 
-                while (slide.isBusy()) {
-                    r = r*r + 1;
-                }
-
-                return true;
+                r = r*r + 1;
+                return slide.isBusy();
             }
         }
 
-        public Action slideOutOne() {
-            return new SlideOutOne();
+        public Action slideOut() {
+            return new SlideOut();
         }
 
-        public class SlideOutTwo implements Action {
-            private boolean initialized = false;
-            private int r = 0;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    slide.setPower(1);
-                    slide.setTargetPosition((int) Constants.slide_specimen_high_rung_2);
-                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    initialized = true;
-                }
-
-                while (slide.isBusy()) {
-                    r = r*r + 1;
-                }
-
-                return true;
-            }
-        }
-
-        public Action slideOutTwo() {
-            return new SlideOutTwo();
-        }
     }
 
     public class Pivot {
@@ -218,7 +178,7 @@ public class RightSideAuto extends LinearOpMode {
             pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        public class PivotUpOne implements Action {
+        public class PivotUp implements Action {
             private boolean initialized = false;
             private int r = 0;
 
@@ -231,40 +191,13 @@ public class RightSideAuto extends LinearOpMode {
                     initialized = true;
                 }
 
-                while (pivot.isBusy()) {
-                    r = r*r + 1;
-                }
-                return true;
+                r=r*r + 1;
+                return pivot.isBusy();
             }
         }
 
-        public Action pivotUpOne() {
-            return new PivotUpOne();
-        }
-
-        public class PivotUpTwo implements Action {
-            private boolean initialized = false;
-            private int r = 0;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    pivot.setPower(1);
-                    pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_2);
-                    pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    initialized = true;
-                }
-
-                while (pivot.isBusy()) {
-                    r = r*r + 1;
-                }
-
-                return true;
-            }
-        }
-
-        public Action pivotUpTwo() {
-            return new PivotUpTwo();
+        public Action pivotUp() {
+            return new PivotUp();
         }
 
         public class PivotDown implements Action {
@@ -280,11 +213,9 @@ public class RightSideAuto extends LinearOpMode {
                     initialized = true;
                 }
 
-                while (pivot.isBusy()) {
-                    r = r*r + 1;
-                }
+                r = r*r + 1;
 
-                return true;
+                return pivot.isBusy();
             }
         }
 
@@ -294,30 +225,13 @@ public class RightSideAuto extends LinearOpMode {
 
     }
 
-    /*
-    public void score(Slide slide, Claw claw, Pivot pivot) {
-        Actions.runBlocking(new SequentialAction(
-                slide.slideOutOne(),
-                claw.openClaw()
-        ));
-
-        sleep(230);
-
-        Actions.runBlocking(new SequentialAction(
-                slide.slideIn(),
-                pivot.pivotDown()
-        ));
-    }
-
-     */
-
 
     private ElapsedTime runtime = new ElapsedTime();
 
     //private DcMotor slide = null;
     //private DcMotorEx pivot = null;
 
-    private Servo wrist = null;
+    //private Servo wrist = null;
 
     //double servoSetpoint = 0;
 
@@ -332,7 +246,7 @@ public class RightSideAuto extends LinearOpMode {
         //slide = hardwareMap.get(DcMotor.class, "slide");
         //pivot = hardwareMap.get(DcMotorEx.class, "pivot");
 
-        wrist = hardwareMap.get(Servo.class, "wrist");
+        //wrist = hardwareMap.get(Servo.class, "wrist");
 
         //clawServo = hardwareMap.get(Servo.class, "claw");
 
@@ -340,7 +254,7 @@ public class RightSideAuto extends LinearOpMode {
         Slide slide = new Slide(hardwareMap);
         Pivot pivot = new Pivot(hardwareMap);
         Claw claw = new Claw(hardwareMap);
-        //Wrist wrist1 = new Wrist(hardwareMap);
+        Wrist wrist = new Wrist(hardwareMap);
 
         Action PreloadSpec = roadrunnerDrive.actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
                 .strafeTo(new Vector2d(61, 0)) //preload
@@ -443,6 +357,8 @@ public class RightSideAuto extends LinearOpMode {
                 .setTangent(Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(61, 9, Math.toRadians(0)), Math.toRadians(0))
                 .build();
+
+
 
         waitForStart();
 
@@ -808,19 +724,6 @@ public class RightSideAuto extends LinearOpMode {
 
     //}
 
-
-
-    public void wristIntakeSpecimen() {
-       wrist.setPosition(0.4);
-    }
-
-    public void wristScoreSpecimen1() {
-        wrist.setPosition(0.38);
-    }
-
-    public void wristScoreSpecimen2() {
-        wrist.setPosition(0.38);
-    }
 
     /*
     public void slideIn() {

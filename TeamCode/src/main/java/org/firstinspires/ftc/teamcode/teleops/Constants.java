@@ -32,8 +32,7 @@ public  class Constants {
     //public static double slide_clicks_per_inch; // todo: find
     public static double slide_retracted_pose = 5; //encoder counts; minimum slide pose
     public static double slide_max_pose = 2600; //encoder counts; max slide pose
-    public static double slide_specimen_high_rung = 1200;
-    public static double slide_specimen_high_rung_2 = 1350;
+    public static double slide_specimen_high_rung = 900; //TEST TO GET THIS VALUE!!!
 
     public static double slide_trapezoidal_power(double slide_position, double sign) {
         if (slide_position < 900) {

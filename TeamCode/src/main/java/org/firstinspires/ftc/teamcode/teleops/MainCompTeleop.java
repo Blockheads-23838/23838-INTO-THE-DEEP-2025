@@ -29,6 +29,9 @@
 
 package org.firstinspires.ftc.teamcode.teleops;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -36,6 +39,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleops.Constants;
 
 
@@ -84,28 +88,28 @@ public class MainCompTeleop extends LinearOpMode {
 
     private Servo clawServo = null;
 
-    private double pivotError;
-
-    private enum arm_status {
-        STOWED, // slide in, pivot down so we can drive around normally
-        SCORING, // pivot
-        INTAKING
-    }
-
+    /*
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    */
 
     @Override
     public void runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
+        /*
         leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front");
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back");
+
+         */
+
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+
         slide = hardwareMap.get(DcMotor.class, "slide");
         pivot = hardwareMap.get(DcMotorEx.class, "pivot");
 
@@ -124,10 +128,13 @@ public class MainCompTeleop extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
+        /*
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+
+         */
         slide.setDirection(DcMotor.Direction.REVERSE);
         pivot.setDirection(DcMotor.Direction.REVERSE);
 
@@ -145,10 +152,13 @@ public class MainCompTeleop extends LinearOpMode {
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        /*
         leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+         */
 
 
         while (!isStarted() && !isStopRequested()) {
@@ -169,7 +179,7 @@ public class MainCompTeleop extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            handleDrivetrain();
+            handleDrivetrain(drive);
             handleSlide();
             handlePivot();
             handleClaw();
@@ -189,11 +199,18 @@ public class MainCompTeleop extends LinearOpMode {
         servoSetpoint =  servoSetpoint + (gamepad2.right_trigger - gamepad2.left_trigger) * 0.1;
 
         if (gamepad2.left_bumper) { //intake specimen
-            servoSetpoint = 0.4663;
+            servoSetpoint = 0.6631;
         }
 
+        else if (gamepad2.dpad_up) {
+            servoSetpoint = 0.8;
+        }
 
-        servoSetpoint = Math.max(Math.min(servoSetpoint, 0.9), 0);
+        else if (gamepad2.right_bumper) {
+            servoSetpoint = 0.96;
+        }
+
+        servoSetpoint = Math.max(Math.min(servoSetpoint, 0.96), 0);
         telemetry.addData("servo setpoint: ", servoSetpoint);
         if (wrist.getPosition() != servoSetpoint) {
             wrist.setPosition(servoSetpoint);
@@ -202,7 +219,23 @@ public class MainCompTeleop extends LinearOpMode {
 
 
     public void handleSlide() {
-        slide.setPower(-gamepad2.right_stick_y * 1.5);
+        if (gamepad2.dpad_up) { //high rung
+            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            slide.setTargetPosition((int) Constants.slide_specimen_high_rung);
+            slide.setPower(1);
+        }
+
+        else if (gamepad2.dpad_down) {
+            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            slide.setTargetPosition((int) Constants.slide_retracted_pose);
+            slide.setPower(1);
+        }
+
+        else {
+            slide.setPower(-gamepad2.right_stick_y * 1.5);
+        }
 
 
         /*
@@ -240,28 +273,6 @@ public class MainCompTeleop extends LinearOpMode {
     }
 
     public void handlePivot() {
-
-
-
-        //ARSHAN's PIVOT CODE BELOW - FIX IT!!!!
-        /*
-        if (gamepad2.x) { //hold x to get to high basket
-            pivotError = Constants.pivot_high_pose - pivot.getCurrentPosition();
-
-            pivot.setPower(Constants.pivot_error_multiplier * pivotError * pivotError);
-        } else if (gamepad2.y) { //hold y to get to low basket
-            pivotError = Constants.pivot_intake_pose - pivot.getCurrentPosition();
-
-            pivot.setPower(Constants.pivot_error_multiplier * pivotError * pivotError);
-        }
-        */
-        //ARSHAN's PIVOT CODE ABOVE
-
-
-        //pivot.setPower(gamepad2.left_stick_y * 1.2);
-
-
-
         //pivot.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(Constants.pivot_p, Constants.pivot_i, Constants.pivot_d, Constants.pivot_f));
         if (gamepad2.y) {
             pivotAfterAuto = Constants.pivot_high_pose;
@@ -285,7 +296,18 @@ public class MainCompTeleop extends LinearOpMode {
 
 
 
-    public void handleDrivetrain() {
+    public void handleDrivetrain(MecanumDrive drive) {
+        double powMult = gamepad1.right_trigger + 0.5;
+
+        drive.setDrivePowers(new PoseVelocity2d(
+                new Vector2d(
+                        -gamepad1.left_stick_y * powMult,
+                        -gamepad1.left_stick_x * powMult
+                ),
+                -gamepad1.right_stick_x * powMult
+        ));
+
+        /*
         double max;
 
         // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
@@ -343,6 +365,8 @@ public class MainCompTeleop extends LinearOpMode {
         telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
         telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
         telemetry.update();
+
+         */
 
     }
 }
