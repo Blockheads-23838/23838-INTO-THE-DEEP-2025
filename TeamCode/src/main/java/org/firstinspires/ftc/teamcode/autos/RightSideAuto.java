@@ -8,114 +8,680 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.*;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.DualNum;
-import com.acmerobotics.roadrunner.HolonomicController;
-import com.acmerobotics.roadrunner.MecanumKinematics;
-import com.acmerobotics.roadrunner.MinVelConstraint;
-import com.acmerobotics.roadrunner.MotorFeedforward;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.ProfileAccelConstraint;
-import com.acmerobotics.roadrunner.Time;
-import com.acmerobotics.roadrunner.TimeTrajectory;
-import com.acmerobotics.roadrunner.TimeTurn;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TurnConstraints;
-import com.acmerobotics.roadrunner.Twist2dDual;
-import com.acmerobotics.roadrunner.VelConstraint;
-import com.acmerobotics.roadrunner.ftc.DownsampledWriter;
-import com.acmerobotics.roadrunner.ftc.Encoder;
-import com.acmerobotics.roadrunner.ftc.FlightRecorder;
-import com.acmerobotics.roadrunner.ftc.LazyImu;
-import com.acmerobotics.roadrunner.ftc.LynxFirmware;
-import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
-import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
-import com.acmerobotics.roadrunner.ftc.RawEncoder;
-import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
-import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
-import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
-import org.firstinspires.ftc.teamcode.messages.PoseMessage;
 import org.firstinspires.ftc.teamcode.teleops.Constants;
 
 import java.lang.Math;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+@Config
 @Autonomous(name="right side auto", group="beta")
 public class RightSideAuto extends LinearOpMode {
+    /*
+    public class Wrist {
+        private Servo wristS;
+
+        public Wrist(HardwareMap hardwareMap) {
+            wristS = hardwareMap.get(Servo.class, "wrist");
+
+        }
+
+        public class WristIntakeSpecimen implements Action {
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+
+                wristS.setPosition(0.4);
+                return false;
+            }
+        }
+
+        public Action wristIntakeSpecimen() {
+            return new WristIntakeSpecimen();
+        }
+
+        public class WristScoreSpecimen1 implements Action {
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+
+
+                wristS.setPosition(0.45);
+                return false;
+            }
+        }
+
+        public Action wristScoreSpecimen1() {
+            return new WristScoreSpecimen1();
+        }
+        //public void wristIntakeSpecimen() {
+            //wrist.setPosition(0.4);
+        //}
+
+        //public void wristScoreSpecimen1() {
+            //wrist.setPosition(0.45);
+        //}
+
+        public class WristScoreSpecimen2 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+
+                wristS.setPosition(0.38);
+                return false;
+            }
+        }
+
+        public Action wristScoreSpecimen2() {
+            return new WristScoreSpecimen2();
+        }
+
+    }
+
+     */
+
+    public class Claw {
+        private Servo clawServo;
+
+        public Claw(HardwareMap hardwareMap) {
+            clawServo = hardwareMap.get(Servo.class, "claw");
+        }
+
+        public class CloseClaw implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                clawServo.setPosition(1);
+                return false;
+            }
+        }
+
+        public Action closeClaw() {
+            return new CloseClaw();
+        }
+
+        public class OpenClaw implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                clawServo.setPosition(0.5);
+                return false;
+            }
+        }
+
+        public Action openClaw() {
+            return new OpenClaw();
+        }
+    }
+
+    public class Slide {
+        private DcMotor slide;
+
+        public Slide(HardwareMap hardwareMap) {
+           slide = hardwareMap.get(DcMotor.class, "slide");
+           slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+           slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+           slide.setDirection(DcMotor.Direction.REVERSE);
+           slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        public class SlideIn implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    slide.setPower(1);
+                    slide.setTargetPosition((int) Constants.slide_retracted_pose);
+                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                while (slide.isBusy()) {
+                    r = r*r + 1;
+                }
+
+                return true;
+            }
+        }
+
+        public Action slideIn() {
+            return new SlideIn();
+        }
+
+        public class SlideOutOne implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    slide.setPower(1);
+                    slide.setTargetPosition((int) Constants.slide_specimen_high_rung);
+                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                while (slide.isBusy()) {
+                    r = r*r + 1;
+                }
+
+                return true;
+            }
+        }
+
+        public Action slideOutOne() {
+            return new SlideOutOne();
+        }
+
+        public class SlideOutTwo implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    slide.setPower(1);
+                    slide.setTargetPosition((int) Constants.slide_specimen_high_rung_2);
+                    slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                while (slide.isBusy()) {
+                    r = r*r + 1;
+                }
+
+                return true;
+            }
+        }
+
+        public Action slideOutTwo() {
+            return new SlideOutTwo();
+        }
+    }
+
+    public class Pivot {
+        private DcMotorEx pivot;
+
+        public Pivot(HardwareMap hardwareMap) {
+            pivot = hardwareMap.get(DcMotorEx.class, "pivot");
+            pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            pivot.setDirection(DcMotor.Direction.REVERSE);
+            pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        public class PivotUpOne implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    pivot.setPower(1);
+                    pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_1);
+                    pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                while (pivot.isBusy()) {
+                    r = r*r + 1;
+                }
+                return true;
+            }
+        }
+
+        public Action pivotUpOne() {
+            return new PivotUpOne();
+        }
+
+        public class PivotUpTwo implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    pivot.setPower(1);
+                    pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_2);
+                    pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                while (pivot.isBusy()) {
+                    r = r*r + 1;
+                }
+
+                return true;
+            }
+        }
+
+        public Action pivotUpTwo() {
+            return new PivotUpTwo();
+        }
+
+        public class PivotDown implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    pivot.setPower(1);
+                    pivot.setTargetPosition((int) Constants.pivot_intake_pose);
+                    pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                while (pivot.isBusy()) {
+                    r = r*r + 1;
+                }
+
+                return true;
+            }
+        }
+
+        public Action pivotDown() {
+            return new PivotDown();
+        }
+
+    }
+
+    /*
+    public void score(Slide slide, Claw claw, Pivot pivot) {
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOutOne(),
+                claw.openClaw()
+        ));
+
+        sleep(230);
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideIn(),
+                pivot.pivotDown()
+        ));
+    }
+
+     */
+
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    private DcMotor slide = null;
-    private DcMotorEx pivot = null;
+    //private DcMotor slide = null;
+    //private DcMotorEx pivot = null;
 
     private Servo wrist = null;
 
-    double servoSetpoint = 0;
+    //double servoSetpoint = 0;
 
-    private Servo clawServo = null;
+    //private Servo clawServo = null;
 
-    private boolean boolPivotUp = false;
-
-    //move robot 28 inches forward, score on high rung, open claw, bring slide back, move robot back, pivot down, then push 3 pieces in.
+    //private boolean boolPivotUp = false;
 
 
 
     @Override
     public void runOpMode() throws InterruptedException {
-        slide = hardwareMap.get(DcMotor.class, "slide");
-        pivot = hardwareMap.get(DcMotorEx.class, "pivot");
+        //slide = hardwareMap.get(DcMotor.class, "slide");
+        //pivot = hardwareMap.get(DcMotorEx.class, "pivot");
 
         wrist = hardwareMap.get(Servo.class, "wrist");
 
-        clawServo = hardwareMap.get(Servo.class, "claw");
+        //clawServo = hardwareMap.get(Servo.class, "claw");
 
-        MecanumDrive roadrunnerDrive = new MecanumDrive(hardwareMap, new Pose2d(9, -63, Math.toRadians(90)));
+        MecanumDrive roadrunnerDrive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
+        Slide slide = new Slide(hardwareMap);
+        Pivot pivot = new Pivot(hardwareMap);
+        Claw claw = new Claw(hardwareMap);
+        //Wrist wrist1 = new Wrist(hardwareMap);
+
+        Action PreloadSpec = roadrunnerDrive.actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+                .strafeTo(new Vector2d(61, 0)) //preload
+                .build();
+
+        Action PushTicks = roadrunnerDrive.actionBuilder(new Pose2d(61, 0, Math.toRadians(0)))
+                .setTangent(Math.toRadians(180)) //pushticks
+                .splineToSplineHeading(new Pose2d(46, -30, Math.toRadians(90)), Math.toRadians(-90))
+                .splineToSplineHeading(new Pose2d(102, -57, Math.toRadians(180)), Math.toRadians(0))
+                .setReversed(true)
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(107, -64), Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(105, -71), Math.toRadians(180))
+                .strafeTo(new Vector2d(30, -71))
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(105, -71), Math.toRadians(0))
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(108, -80), Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(105, -90), Math.toRadians(180))
+                .strafeTo(new Vector2d(30, -90))
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(105, -90), Math.toRadians(0))
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(108, -99), Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(105, -108), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(6.3, -85), Math.toRadians(180))
+                .build();
+
+                /*
+                .strafeTo(new Vector2d(45, 0))
+                .splineToSplineHeading(new Pose2d(102, -57, Math.toRadians(180)), Math.toRadians(0))
+                .setReversed(true)
+                .strafeTo(new Vector2d(105, -71))
+                .strafeTo(new Vector2d(30, -71))
+                .strafeTo(new Vector2d(105, -71))
+                .strafeTo(new Vector2d(105, -90))
+                .strafeTo(new Vector2d(30, -90))
+                .strafeTo(new Vector2d(105, -90))
+                .strafeTo(new Vector2d(105, -108))
+                .strafeTo(new Vector2d(6.3, -100))
+                //.strafeTo(new Vector2d(30, -108))
+                //.strafeTo(new Vector2d(6.3, -85))
+                .build();
+
+                 */
+
+        Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))//new Pose2d(6.3, -85, Math.toRadians(180)))
+                .setReversed(true) //second spec
+                .setTangent(Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(61, 0, Math.toRadians(0)), Math.toRadians(0))
+                .build();
+
+                /*
+                .setReversed(true)
+                .setTangent(0)
+                .splineToSplineHeading(new Pose2d(61, 0, Math.toRadians(0)), Math.toRadians(0))
+                .build();
+                 */
+
+        Action ThirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 0, Math.toRadians(0)))
+                .setReversed(false) //third spec pickup
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .build();
+
+                /*
+                .setReversed(false)
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .build();
+                 */
+
+        Action ThirdSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
+                .setReversed(true) //third spec
+                .setTangent(Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(61, 3, Math.toRadians(0)), Math.toRadians(0))
+                .build();
+
+        Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 3, Math.toRadians(0)))
+                .setReversed(false) //fourth spec pickup
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .build();
+
+        Action FourthSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
+                .setReversed(true) //fourth spec
+                .setTangent(Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(61, 6, Math.toRadians(0)), Math.toRadians(0))
+                .build();
+
+        Action FifthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 6, Math.toRadians(0)))
+                .setReversed(false) //fifth spec pickup
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .build();
+
+        Action FifthSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
+                .setReversed(true) //fifth spec
+                .setTangent(Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(61, 9, Math.toRadians(0)), Math.toRadians(0))
+                .build();
+
+        waitForStart();
+
+        //testing trajectories for now; when done, add subsystems through parallel + sequential complex actions
+        Actions.runBlocking(PreloadSpec);
+        Actions.runBlocking(PushTicks);
+        Actions.runBlocking(SecondSpec);
+        Actions.runBlocking(ThirdSpecPickup);
+        Actions.runBlocking(ThirdSpec);
+        Actions.runBlocking(FourthSpecPickup);
+        Actions.runBlocking(FourthSpec);
+        Actions.runBlocking(FifthSpecPickup);
+        Actions.runBlocking(FifthSpec);
 
 
-        pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        pivot.setDirection(DcMotor.Direction.REVERSE);
-        slide.setDirection(DcMotor.Direction.REVERSE);
+        /*
+        Action PreloadSpec = roadrunnerDrive.actionBuilder(new Pose2d(9, -63, Math.toRadians(90)))
+                .lineToY(-15)
+                .build();
 
-        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Action PushTicks = roadrunnerDrive.actionBuilder(new Pose2d(9, -15, Math.toRadians(90)))
+                .lineToYSplineHeading(-15, Math.toRadians(-90))
+                .setReversed(true)
+                .strafeTo(new Vector2d(9, -20))
+                .strafeTo(new Vector2d(63, -20))
+                .strafeTo(new Vector2d(63, 43))
+                .strafeTo(new Vector2d(83, 43))
+                .strafeTo(new Vector2d(83, -38))
+                .strafeTo(new Vector2d(83, 43))
+                .strafeTo(new Vector2d(103, 43))
+                .strafeTo(new Vector2d(103, -38))
+                .strafeTo(new Vector2d(103, 43))
+                .strafeTo(new Vector2d(117, 43))
+                .strafeTo(new Vector2d(117, -38))
+                .strafeTo(new Vector2d(90, -38))
+                .strafeTo(new Vector2d(90, -58.29))
+                .build();
+
+       Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(90, -58.29, Math.toRadians(-90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(0, -3, Math.toRadians(90)), Math.toRadians(-90))//try 90 as tangent too
+                .build();
+
+        Action ThirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(0, -3, Math.toRadians(90)))
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(90, -58.4, Math.toRadians(-90)), Math.toRadians(90))//try -90 as tangent too
+                .build();
+
+        Action ThirdSpec = roadrunnerDrive.actionBuilder(new Pose2d(90, -58.4, Math.toRadians(-90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-6, -3, Math.toRadians(90)), Math.toRadians(-90))//try 90 as tangent too
+                .build();
+
+        Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(-6, -3, Math.toRadians(90)))
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(90, -58.4, Math.toRadians(-90)), Math.toRadians(90)) //try -90 as tangent too
+                .build();
+
+        Action FourthSpec = roadrunnerDrive.actionBuilder(new Pose2d(90, -58.4, Math.toRadians(-90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-11, -3, Math.toRadians(90)), Math.toRadians(-90)) //try 90 as tangent too
+                .build();
+
+        Action FifthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(-11, -3, Math.toRadians(90)))
+                .setReversed(false)
+                .splineToSplineHeading(new Pose2d(90, -58.4, Math.toRadians(-90)), Math.toRadians(90))//try -90 as tangent too
+                .build();
+
+        Action FifthSpec = roadrunnerDrive.actionBuilder(new Pose2d(90, -58.4, Math.toRadians(-90)))
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(-16, -3, Math.toRadians(90)), Math.toRadians(-90))//try 90 as tangent too
+                .build();
 
         waitForStart();
 
         runtime.reset();
 
+        //MOVEMENT STARTS HERE
+        wrist.setPosition(0);
+
+        Actions.runBlocking(claw.closeClaw());
+
+        Actions.runBlocking(new SequentialAction(//ParallelAction(
+                PreloadSpec,
+                //new SequentialAction(
+                        pivot.pivotUpOne()//,
+                        //wrist1.wristScoreSpecimen1(),
+                //)
+        ));
+
+        wristScoreSpecimen1();
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOutOne(),
+                claw.openClaw()
+        ));
+
+        sleep(230);
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideIn(),
+                pivot.pivotDown()
+        ));
+
+        Actions.runBlocking(new SequentialAction(
+                PushTicks,
+                claw.closeClaw()
+        ));
+
+
+        Actions.runBlocking(new SequentialAction(//ParallelAction(
+                SecondSpec,
+                //new SequentialAction(
+                        pivot.pivotUpTwo()//,
+                        //wrist1.wristScoreSpecimen2()
+                //)
+        ));
+
+
+        wristScoreSpecimen2();
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOutOne(),
+                claw.openClaw()
+        ));
+
+        sleep(230);
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideIn(),
+                pivot.pivotDown()
+        ));
+
+        wristScoreSpecimen1();
+
+        Actions.runBlocking(new SequentialAction(
+                //new ParallelAction(
+                        ThirdSpecPickup,
+                        //wrist1.wristScoreSpecimen1()),//works as intake pose
+                claw.closeClaw()
+        ));
+
+
+        Actions.runBlocking(new SequentialAction(//ParallelAction(
+                ThirdSpec,
+                //new SequentialAction(
+                        pivot.pivotUpTwo()//,
+                        //wrist1.wristScoreSpecimen2()
+                //)
+        ));
+
+        wristScoreSpecimen2();
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOutOne(),
+                claw.openClaw()
+        ));
+
+        sleep(230);
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideIn(),
+                pivot.pivotDown()
+        ));
+
+        wristScoreSpecimen1();
+
+        Actions.runBlocking(new SequentialAction(
+                //new ParallelAction(
+                        FourthSpecPickup,
+                        //wrist1.wristScoreSpecimen1()//works as intake pose
+                //),
+                claw.closeClaw()
+        ));
+
+
+
+        Actions.runBlocking(new SequentialAction(//ParallelAction(
+                FourthSpec,
+                //new SequentialAction(
+                        pivot.pivotUpTwo()//,
+                        //.wristScoreSpecimen2()
+                //)
+        ));
+
+        wristScoreSpecimen2();
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOutOne(),
+                claw.openClaw()
+        ));
+
+        sleep(230);
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideIn(),
+                pivot.pivotDown()
+        ));
+
+        wristScoreSpecimen1();
+
+        Actions.runBlocking(new SequentialAction(
+                //new ParallelAction(
+                        FifthSpecPickup,
+                        //wrist1.wristScoreSpecimen1()//works as intake pose
+                //),
+                claw.closeClaw()
+        ));
+
+
+        Actions.runBlocking(new SequentialAction(//ParallelAction(
+                FifthSpec,
+                //new SequentialAction(
+                        pivot.pivotUpTwo()//,
+                        //wrist1.wristScoreSpecimen2()
+                //)
+        ));
+
+        wristScoreSpecimen2();
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOutOne(),
+                claw.openClaw()
+        ));
+
+        sleep(230);
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideIn(),
+                pivot.pivotDown()
+        ));
+
+        */
+    }
+
+        /*
         Action toSub = roadrunnerDrive.actionBuilder(new Pose2d(9, -63, Math.toRadians(90)))
                 .lineToY(-3)
                 .build();
@@ -147,12 +713,12 @@ public class RightSideAuto extends LinearOpMode {
                 .strafeTo(new Vector2d(90, -50))
                 .strafeTo(new Vector2d(90, -58.29))
                 //.splineToLinearHeading(new Pose2d(90, -60, Math.toRadians(-90)), Math.toRadians(90))
-                /*
-                .strafeTo(new Vector2d(110, -60))
-                .splineTo(new Vector2d(100, -50), Math.toRadians(90))
-                .splineTo(new Vector2d(90, -60), Math.toRadians(180))
 
-                 */
+                //.strafeTo(new Vector2d(110, -60))
+                //.splineTo(new Vector2d(100, -50), Math.toRadians(90))
+                //.splineTo(new Vector2d(90, -60), Math.toRadians(180))
+
+
                 //.strafeTo(new Vector2d(90, -48))
                 //.strafeTo(new Vector2d(95, -60))
                 //.setReversed(true)
@@ -219,7 +785,7 @@ public class RightSideAuto extends LinearOpMode {
         slideIn();
         pivotDown();
 
-
+        */
 
 
         /*
@@ -240,7 +806,7 @@ public class RightSideAuto extends LinearOpMode {
         */
 
 
-    }
+    //}
 
 
 
@@ -249,13 +815,14 @@ public class RightSideAuto extends LinearOpMode {
     }
 
     public void wristScoreSpecimen1() {
-        wrist.setPosition(0.45);
+        wrist.setPosition(0.38);
     }
 
     public void wristScoreSpecimen2() {
         wrist.setPosition(0.38);
     }
 
+    /*
     public void slideIn() {
         slide.setTargetPosition((int) Constants.slide_retracted_pose);
         slide.setPower(1);
@@ -293,9 +860,12 @@ public class RightSideAuto extends LinearOpMode {
             slide.setPower(-gamepad2.right_stick_y);
         }
 
-         */
+
     }
 
+     */
+
+    /*
     public void slideOutTwo() {
         //slide.setPower(-gamepad2.right_stick_y * 1.5);
 
@@ -308,40 +878,17 @@ public class RightSideAuto extends LinearOpMode {
 
     }
 
-    public void openClaw() {
-        clawServo.setPosition(0.5);
-    }
+     */
 
-    public void closeClaw() {
-        clawServo.setPosition(1);
-    }
+    //public void openClaw() {
+        //clawServo.setPosition(0.5);
+    //}
 
-    public void pivotUpOne() {
-        pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_1);
-        pivot.setPower(1);
-        int r = 0;
-        while (pivot.isBusy()) {
-           r = r*r + 1;
-        }
-    }
+    //public void closeClaw() {
+        //clawServo.setPosition(1);
+    //}
 
-    public void pivotUpTwo() {
-        pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_2);
-        pivot.setPower(1);
-        int r = 0;
-        while (pivot.isBusy()) {
-            r = r*r + 1;
-        }
-    }
 
-    public void pivotDown() {
-        pivot.setTargetPosition((int) Constants.pivot_intake_pose);
-        pivot.setPower(1);
-        int r = 0;
-        while (pivot.isBusy()) {
-            r =r*r+1;
-        }
-    }
 
     /*
     public void handlePivot() {

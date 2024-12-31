@@ -150,9 +150,6 @@ public class MainCompTeleop extends LinearOpMode {
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        clawServo.setPosition(1);
-
-        wrist.setPosition(0);
 
         while (!isStarted() && !isStopRequested()) {
             //telemetry.addData("pivot position: ", pivot.getCurrentPosition());
@@ -164,7 +161,11 @@ public class MainCompTeleop extends LinearOpMode {
         runtime.reset();
 
 
+        if (opModeIsActive()) {
+            clawServo.setPosition(1);
 
+            wrist.setPosition(0);
+        }
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
