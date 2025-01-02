@@ -39,7 +39,7 @@ public class RightSideAuto extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                wristS.setPosition(0.6631);
+                wristS.setPosition(1-0.6631);
                 return false;
             }
         }
@@ -52,7 +52,7 @@ public class RightSideAuto extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                wristS.setPosition(0.78);
+                wristS.setPosition(1-0.78);
                 return false;
             }
         }
@@ -64,7 +64,7 @@ public class RightSideAuto extends LinearOpMode {
         public class WristScoreSpecimen implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                wristS.setPosition(0.96);
+                wristS.setPosition(1-0.96);
                 return false;
             }
         }
@@ -186,7 +186,7 @@ public class RightSideAuto extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     pivot.setPower(1);
-                    pivot.setTargetPosition((int) Constants.pivot_high_pose_auto_1);
+                    pivot.setTargetPosition((int) Constants.pivot_high_pose);
                     pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
                 }
@@ -257,32 +257,102 @@ public class RightSideAuto extends LinearOpMode {
         Wrist wrist = new Wrist(hardwareMap);
 
         Action PreloadSpec = roadrunnerDrive.actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                .strafeTo(new Vector2d(61, 0)) //preload
+                .strafeTo(new Vector2d(63.35, 0)) //preload
                 .build();
 
         Action PushTicks = roadrunnerDrive.actionBuilder(new Pose2d(61, 0, Math.toRadians(0)))
                 .setTangent(Math.toRadians(180)) //pushticks
-                .splineToSplineHeading(new Pose2d(46, -30, Math.toRadians(90)), Math.toRadians(-90))
-                .splineToSplineHeading(new Pose2d(102, -57, Math.toRadians(180)), Math.toRadians(0))
+
+                /* test
+                .splineToSplineHeading(new Pose2d(50, -17, Math.toRadians(90)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(106, -57, Math.toRadians(180)), Math.toRadians(0))
+                .setReversed(true) //TESTING!
+                .splineToConstantHeading(new Vector2d(110, -67.5), Math.toRadians(270))
+
+                 */
+
+                .splineToConstantHeading(new Vector2d(50, -17), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(106, -58), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(108, -72), Math.toRadians(270))
+                //.splineToConstantHeading(new Vector2d(105, -73), Math.toRadians(180))
+
+
+                //.splineToSplineHeading(new Pose2d(30, -17, Math.toRadians(90)), Math.toRadians(270))
+                //.splineToSplineHeading(new Pose2d(102, -57, Math.toRadians(180)), Math.toRadians(0))
+
+                //.splineTo(new Vector2d(30, -17), Math.toRadians(270)) #2
+
+                //.splineTo(new Vector2d(57, -56), Math.toRadians(0))
+                //.setTangent(Math.toRadians(0))
+                //.splineToConstantHeading(new Vector2d(102, -57), Math.toRadians(0))
+
+                //.splineTo(new Vector2d(102, -57), Math.toRadians(0)) #2
+
+                //.setReversed(true)
+
+
+
+                //.setTangent(Math.toRadians(0))
+
+                //.splineToConstantHeading(new Vector2d(105, -64), Math.toRadians(-90))
+                //.splineToConstantHeading(new Vector2d(102, -71), Math.toRadians(180))
+                //.strafeTo(new Vector2d(30, -71))
+
+                .splineToConstantHeading(new Vector2d(30, -71), Math.toRadians(180))
+
+
+                .setTangent(Math.toRadians(0))
+
+                .lineToXSplineHeading(110, Math.toRadians(180))
+
+                //.splineToConstantHeading(new Vector2d(106, -71), Math.toRadians(0)) test
+
+
+                //.lineToXSplineHeading(106, Math.toRadians(180))
+
+
                 .setReversed(true)
-                .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(107, -64), Math.toRadians(-90))
-                .splineToConstantHeading(new Vector2d(105, -71), Math.toRadians(180))
-                .strafeTo(new Vector2d(30, -71))
-                .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(105, -71), Math.toRadians(0))
-                .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(108, -80), Math.toRadians(-90))
-                .splineToConstantHeading(new Vector2d(105, -90), Math.toRadians(180))
-                .strafeTo(new Vector2d(30, -90))
-                .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(105, -90), Math.toRadians(0))
-                .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(108, -99), Math.toRadians(-90))
-                .splineToConstantHeading(new Vector2d(105, -108), Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(6.3, -85), Math.toRadians(180))
+
+                .setTangent(270)
+                .splineToConstantHeading(new Vector2d(102, -91), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(30, -91), Math.toRadians(180))
+
+                .setTangent(0)
+                .splineToConstantHeading(new Vector2d(101, -91), Math.toRadians(0))//.splineToConstantHeading(new Vector2d(108, -87), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(103, -106), Math.toRadians(270))//.splineToConstantHeading(new Vector2d(103.3, -93), Math.toRadians(180))
+                //.splineToConstantHeading(new Vector2d(102, -110), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(30, -110), Math.toRadians(180))
+
+//                .setTangent(0)
+//                .splineToConstantHeading(new Vector2d(108, -95), Math.toRadians(0))
+//
+//                .splineToConstantHeading(new Vector2d(103.3, -98), Math.toRadians(180))
+//                .splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
+//
+//                .setTangent(0)
+//                .splineToConstantHeading(new Vector2d(108, -103), Math.toRadians(0))
+//
+//                .splineToConstantHeading(new Vector2d(103.3, -108), Math.toRadians(180))
+//                .splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
+
+                .splineToConstantHeading(new Vector2d(6.3, -90), Math.toRadians(180))
+
                 .build();
+
+                //.setTangent(Math.toRadians(0))
+                //.splineToConstantHeading(new Vector2d(105, -80), Math.toRadians(-90))
+                //.splineToConstantHeading(new Vector2d(102, -90), Math.toRadians(180))
+                //.strafeTo(new Vector2d(30, -90))
+                //.setTangent(Math.toRadians(0))
+                //.splineToConstantHeading(new Vector2d(102, -90), Math.toRadians(0))
+                //.setTangent(Math.toRadians(0))
+                //.splineToConstantHeading(new Vector2d(105, -99), Math.toRadians(-90))
+                //.splineToConstantHeading(new Vector2d(102, -108), Math.toRadians(180))
+                //.splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
+                //.splineToConstantHeading(new Vector2d(6.3, -85), Math.toRadians(180))
+                //.build();
+
+
 
                 /*
                 .strafeTo(new Vector2d(45, 0))
@@ -305,7 +375,7 @@ public class RightSideAuto extends LinearOpMode {
         Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))//new Pose2d(6.3, -85, Math.toRadians(180)))
                 .setReversed(true) //second spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(61, 0, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 0, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
                 /*
@@ -331,7 +401,7 @@ public class RightSideAuto extends LinearOpMode {
         Action ThirdSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
                 .setReversed(true) //third spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(61, 3, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 3, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
         Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 3, Math.toRadians(0)))
@@ -343,7 +413,7 @@ public class RightSideAuto extends LinearOpMode {
         Action FourthSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
                 .setReversed(true) //fourth spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(61, 6, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 6, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
         Action FifthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 6, Math.toRadians(0)))
@@ -355,7 +425,7 @@ public class RightSideAuto extends LinearOpMode {
         Action FifthSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
                 .setReversed(true) //fifth spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(61, 9, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 9, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
 
@@ -364,13 +434,21 @@ public class RightSideAuto extends LinearOpMode {
 
         //testing trajectories for now; when done, add subsystems through parallel + sequential complex actions
         Actions.runBlocking(PreloadSpec);
+        sleep(500);
         Actions.runBlocking(PushTicks);
+        sleep(500);
         Actions.runBlocking(SecondSpec);
+        sleep(500);
         Actions.runBlocking(ThirdSpecPickup);
+        sleep(500);
         Actions.runBlocking(ThirdSpec);
+        sleep(500);
         Actions.runBlocking(FourthSpecPickup);
+        sleep(500);
         Actions.runBlocking(FourthSpec);
+        sleep(500);
         Actions.runBlocking(FifthSpecPickup);
+        sleep(500);
         Actions.runBlocking(FifthSpec);
 
 

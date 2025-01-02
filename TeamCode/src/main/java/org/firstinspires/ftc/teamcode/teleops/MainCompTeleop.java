@@ -84,6 +84,8 @@ public class MainCompTeleop extends LinearOpMode {
 
     double servoSetpoint = 0;
 
+    double slideSetpoint = 0;
+
     double pivotAfterAuto = 0;
 
     private Servo clawServo = null;
@@ -147,6 +149,7 @@ public class MainCompTeleop extends LinearOpMode {
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -174,7 +177,7 @@ public class MainCompTeleop extends LinearOpMode {
         if (opModeIsActive()) {
             clawServo.setPosition(1);
 
-            wrist.setPosition(0);
+            //wrist.setPosition(0);
         }
 
         // run until the end of the match (driver presses STOP)
@@ -191,24 +194,29 @@ public class MainCompTeleop extends LinearOpMode {
             telemetry.addData("wrist position", wrist.getPosition());
             telemetry.addData("claw position", clawServo.getPosition());
 
+            telemetry.update();
+
             sleep(10);
         }
     }
 
     public void handleWrist() {
-        servoSetpoint =  servoSetpoint + (gamepad2.right_trigger - gamepad2.left_trigger) * 0.1;
+        servoSetpoint =  servoSetpoint + (gamepad2.left_trigger - gamepad2.right_trigger) * 0.1;
 
-        if (gamepad2.left_bumper) { //intake specimen
-            servoSetpoint = 0.6631;
+        if (gamepad2.left_bumper) { //intake specimen pose
+            servoSetpoint = 1-0.6631;
         }
 
-        else if (gamepad2.dpad_up) {
-            servoSetpoint = 0.8;
+        else if (gamepad2.dpad_up) { //ready specimen while pivot goes up - all linear slide needs to do is push now and the spec will be scored.
+            servoSetpoint = 0.5;
         }
 
-        else if (gamepad2.right_bumper) {
-            servoSetpoint = 0.96;
+        /*
+        else if (gamepad2.right_bumper) { //score on high rung
+            servoSetpoint = 1-0.96;
         }
+        */
+
 
         servoSetpoint = Math.max(Math.min(servoSetpoint, 0.96), 0);
         telemetry.addData("servo setpoint: ", servoSetpoint);
@@ -219,23 +227,45 @@ public class MainCompTeleop extends LinearOpMode {
 
 
     public void handleSlide() {
-        if (gamepad2.dpad_up) { //high rung
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            slide.setTargetPosition((int) Constants.slide_specimen_high_rung);
+        if (gamepad2.right_bumper) { //SCORE SPECIMEN ON HIGH RUNG
+            slideSetpoint = Constants.slide_specimen_high_rung; //
+        }
+
+        slideSetpoint -= (gamepad2.right_stick_y * 60); //add manual control
+
+        if (slideSetpoint <= 5) {
+            slideSetpoint = 5;
+        }
+
+        slide.setTargetPosition((int) slideSetpoint);
+
+        if (Math.abs(slide.getCurrentPosition() - slideSetpoint) > 10) {
             slide.setPower(1);
         }
 
+        else {
+            slide.setPower(0);
+        }
+
+        /*
+        else if (pivot.getCurrentPosition() < (Constants.pivot_high_pose - 20)){
+            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            slide.setPower(-gamepad2.right_stick_y * 1.5);
+        }
+
+         */
+
+        /*
         else if (gamepad2.dpad_down) {
             slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             slide.setTargetPosition((int) Constants.slide_retracted_pose);
             slide.setPower(1);
         }
+        */
 
-        else {
-            slide.setPower(-gamepad2.right_stick_y * 1.5);
-        }
+
+
 
 
         /*
@@ -283,6 +313,7 @@ public class MainCompTeleop extends LinearOpMode {
             pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             pivot.setTargetPosition(((int) Constants.pivot_high_pose) - (int)(pivotAfterAuto));
             pivot.setPower(1);
+
         } else if (gamepad2.dpad_down) {
             pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
