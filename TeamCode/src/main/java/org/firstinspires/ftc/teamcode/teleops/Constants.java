@@ -9,7 +9,7 @@ public  class Constants {
     //ticks
     // ------------ PIVOT -------------
     public static double pivot_intake_pose = 55;//30.680851, 80; //encoder counts; lowest the arm should go
-    public static double pivot_high_pose = 1285;//1457.3404, 3800; //encoder counts; highest the arm should go; high basket
+    public static double pivot_high_pose = 1330;//1457.3404, 3800; //encoder counts; highest the arm should go; high basket
     //public static double pivot_high_pose_auto_1 = 1285.2872;//1342.2872; 3500;//3480, 3430, 3400; //FOR AUTOS!!!
     //public static double pivot_high_pose_auto_2 = 1350.8138;//3650; //3480, 3430; FOR AUTOS!!
     public static double pivot_after_auto_pose = pivot_intake_pose;
@@ -32,7 +32,7 @@ public  class Constants {
     //public static double slide_clicks_per_inch; // todo: find
     public static double slide_retracted_pose = 5; //encoder counts; minimum slide pose
     public static double slide_max_pose = 2600; //encoder counts; max slide pose
-    public static double slide_specimen_high_rung = 1200; //TEST TO GET THIS VALUE!!!
+    public static double slide_specimen_high_rung = 1250; //TEST TO GET THIS VALUE!!!
 
     public static double slide_trapezoidal_power(double slide_position, double sign) {
         if (slide_position < 900) {

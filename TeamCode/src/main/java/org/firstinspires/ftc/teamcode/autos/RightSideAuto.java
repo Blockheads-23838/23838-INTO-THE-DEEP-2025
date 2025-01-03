@@ -39,7 +39,7 @@ public class RightSideAuto extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                wristS.setPosition(1-0.6631);
+                wristS.setPosition(1 - 0.6631);
                 return false;
             }
         }
@@ -52,7 +52,7 @@ public class RightSideAuto extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                wristS.setPosition(1-0.78);
+                wristS.setPosition(1 - 0.5);
                 return false;
             }
         }
@@ -60,19 +60,6 @@ public class RightSideAuto extends LinearOpMode {
         public Action wristReadySpecimen() {
             return new WristReadySpecimen();
         }
-
-        public class WristScoreSpecimen implements Action {
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                wristS.setPosition(1-0.96);
-                return false;
-            }
-        }
-
-        public Action wristScoreSpecimen() {
-            return new WristScoreSpecimen();
-        }
-
 
     }
 
@@ -260,7 +247,7 @@ public class RightSideAuto extends LinearOpMode {
                 .strafeTo(new Vector2d(63.35, 0)) //preload
                 .build();
 
-        Action PushTicks = roadrunnerDrive.actionBuilder(new Pose2d(61, 0, Math.toRadians(0)))
+        Action PushTicks = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 0, Math.toRadians(0)))
                 .setTangent(Math.toRadians(180)) //pushticks
 
                 /* test
@@ -271,9 +258,9 @@ public class RightSideAuto extends LinearOpMode {
 
                  */
 
-                .splineToConstantHeading(new Vector2d(50, -17), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(35, -30), Math.toRadians(270))
                 .splineToConstantHeading(new Vector2d(106, -58), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(108, -72), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(108, -70), Math.toRadians(270))
                 //.splineToConstantHeading(new Vector2d(105, -73), Math.toRadians(180))
 
 
@@ -298,12 +285,12 @@ public class RightSideAuto extends LinearOpMode {
                 //.splineToConstantHeading(new Vector2d(102, -71), Math.toRadians(180))
                 //.strafeTo(new Vector2d(30, -71))
 
-                .splineToConstantHeading(new Vector2d(30, -71), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(25, -71), Math.toRadians(180))
 
 
                 .setTangent(Math.toRadians(0))
 
-                .lineToXSplineHeading(110, Math.toRadians(180))
+                .lineToXSplineHeading(113, Math.toRadians(180))
 
                 //.splineToConstantHeading(new Vector2d(106, -71), Math.toRadians(0)) test
 
@@ -315,13 +302,16 @@ public class RightSideAuto extends LinearOpMode {
 
                 .setTangent(270)
                 .splineToConstantHeading(new Vector2d(102, -91), Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(30, -91), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(30, -94), Math.toRadians(180))
 
                 .setTangent(0)
-                .splineToConstantHeading(new Vector2d(101, -91), Math.toRadians(0))//.splineToConstantHeading(new Vector2d(108, -87), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(103, -106), Math.toRadians(270))//.splineToConstantHeading(new Vector2d(103.3, -93), Math.toRadians(180))
+
+                .splineToConstantHeading(new Vector2d(101, -96), Math.toRadians(0))//.splineToConstantHeading(new Vector2d(108, -87), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(102.4, -104), Math.toRadians(0))
+                .setTangent(180)
+                //.splineToConstantHeading(new Vector2d(103.3, -93), Math.toRadians(180))
                 //.splineToConstantHeading(new Vector2d(102, -110), Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(30, -110), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(30, -104.5), Math.toRadians(180))
 
 //                .setTangent(0)
 //                .splineToConstantHeading(new Vector2d(108, -95), Math.toRadians(0))
@@ -335,7 +325,8 @@ public class RightSideAuto extends LinearOpMode {
 //                .splineToConstantHeading(new Vector2d(103.3, -108), Math.toRadians(180))
 //                .splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
 
-                .splineToConstantHeading(new Vector2d(6.3, -90), Math.toRadians(180))
+                //.splineToConstantHeading(new Vector2d(7.414, -100), Math.toRadians(180))
+                .strafeTo(new Vector2d(7.38, -100))
 
                 .build();
 
@@ -372,10 +363,13 @@ public class RightSideAuto extends LinearOpMode {
 
                  */
 
-        Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))//new Pose2d(6.3, -85, Math.toRadians(180)))
+        Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(7.38, -90, Math.toRadians(180)))//new Pose2d(6.3, -85, Math.toRadians(180)))
                 .setReversed(true) //second spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(63.35, 0, Math.toRadians(0)), Math.toRadians(0))
+                .splineTo(new Vector2d(20, -80), Math.toRadians(90))
+                .lineToYSplineHeading(0, Math.toRadians(0))
+                .setTangent(Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(63.35, 4), Math.toRadians(0))
                 .build();
 
                 /*
@@ -385,10 +379,15 @@ public class RightSideAuto extends LinearOpMode {
                 .build();
                  */
 
-        Action ThirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 0, Math.toRadians(0)))
+        Action ThirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 4, Math.toRadians(0)))
                 .setReversed(false) //third spec pickup
                 .setTangent(Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .splineTo(new Vector2d(20, 0), Math.toRadians(-90))
+                .lineToYSplineHeading(-58, Math.toRadians(180))
+                .setReversed(true)
+                .setTangent(Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(10, -65), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(7.3, -65), Math.toRadians(180))
                 .build();
 
                 /*
@@ -398,48 +397,120 @@ public class RightSideAuto extends LinearOpMode {
                 .build();
                  */
 
-        Action ThirdSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
+        Action ThirdSpec = roadrunnerDrive.actionBuilder(new Pose2d(7.3, -65, Math.toRadians(180)))
                 .setReversed(true) //third spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(63.35, 3, Math.toRadians(0)), Math.toRadians(0))
+                .splineTo(new Vector2d(20, -50), Math.toRadians(90))
+                .lineToYSplineHeading(0, Math.toRadians(0))
+                .setTangent(Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(63.35, 6), Math.toRadians(0))
+                .build();
+                /*
+                .setReversed(true) //third spec
+                .setTangent(Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 1, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
-        Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 3, Math.toRadians(0)))
+                 */
+
+        Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 6, Math.toRadians(0)))
                 .setReversed(false) //fourth spec pickup
                 .setTangent(Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(7.414, -90, Math.toRadians(180)), Math.toRadians(180))
                 .build();
 
-        Action FourthSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
+        Action FourthSpec = roadrunnerDrive.actionBuilder(new Pose2d(7.414, -90, Math.toRadians(180)))
                 .setReversed(true) //fourth spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(63.35, 6, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 2, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
-        Action FifthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(61, 6, Math.toRadians(0)))
+        Action FifthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 2, Math.toRadians(0)))
                 .setReversed(false) //fifth spec pickup
                 .setTangent(Math.toRadians(180))
-                .splineToSplineHeading(new Pose2d(6.3, -85, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(7.414, -90, Math.toRadians(180)), Math.toRadians(180))
                 .build();
 
-        Action FifthSpec = roadrunnerDrive.actionBuilder(new Pose2d(6.3, -85, Math.toRadians(180)))
+        Action FifthSpec = roadrunnerDrive.actionBuilder(new Pose2d(7.414, -90, Math.toRadians(180)))
                 .setReversed(true) //fifth spec
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(63.35, 9, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(63.35, 3, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
 
 
         waitForStart();
 
+        Actions.runBlocking(claw.closeClaw());
+
         //testing trajectories for now; when done, add subsystems through parallel + sequential complex actions
-        Actions.runBlocking(PreloadSpec);
-        sleep(500);
-        Actions.runBlocking(PushTicks);
-        sleep(500);
-        Actions.runBlocking(SecondSpec);
-        sleep(500);
-        Actions.runBlocking(ThirdSpecPickup);
+        Actions.runBlocking(new ParallelAction(
+                PreloadSpec,
+                new SequentialAction(
+                        pivot.pivotUp(),
+                        wrist.wristReadySpecimen()
+                )
+        ));
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOut(),
+                claw.openClaw(),
+                slide.slideIn()
+        ));
+
+        Actions.runBlocking(new ParallelAction(
+                PushTicks,
+                new SequentialAction(
+                        pivot.pivotDown(),
+                        wrist.wristIntakeSpecimen()
+                )
+        ));
+
+        sleep(10);
+
+        Actions.runBlocking(claw.closeClaw());
+
+        sleep(200);
+
+        Actions.runBlocking(new SequentialAction(
+                pivot.pivotUp(),
+                wrist.wristReadySpecimen(),
+                SecondSpec
+        ));
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOut(),
+                claw.openClaw(),
+                slide.slideIn()
+        ));
+
+        Actions.runBlocking(new ParallelAction(
+                ThirdSpecPickup,
+                new SequentialAction(
+                        pivot.pivotDown(),
+                        wrist.wristIntakeSpecimen()
+                )
+        ));
+
+        sleep(10);
+
+        Actions.runBlocking(claw.closeClaw());
+
+        sleep(200);
+
+        Actions.runBlocking(new SequentialAction(
+                pivot.pivotUp(),
+                wrist.wristReadySpecimen(),
+                ThirdSpec
+        ));
+
+        Actions.runBlocking(new SequentialAction(
+                slide.slideOut(),
+                claw.openClaw(),
+                slide.slideIn()
+        ));
+
+        /*
         sleep(500);
         Actions.runBlocking(ThirdSpec);
         sleep(500);
@@ -447,9 +518,15 @@ public class RightSideAuto extends LinearOpMode {
         sleep(500);
         Actions.runBlocking(FourthSpec);
         sleep(500);
+
+         */
+
+        /* ADD 5 SPEC AFTER MEET 3!
         Actions.runBlocking(FifthSpecPickup);
         sleep(500);
         Actions.runBlocking(FifthSpec);
+
+         */
 
 
 
