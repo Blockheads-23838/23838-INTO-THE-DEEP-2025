@@ -101,11 +101,11 @@ public class RightSideAuto extends LinearOpMode {
         private DcMotor slide;
 
         public Slide(HardwareMap hardwareMap) {
-           slide = hardwareMap.get(DcMotor.class, "slide");
-           slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-           slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-           slide.setDirection(DcMotor.Direction.REVERSE);
-           slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            slide = hardwareMap.get(DcMotor.class, "slide");
+            slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            slide.setDirection(DcMotor.Direction.REVERSE);
+            slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
         public class SlideIn implements Action {
@@ -187,6 +187,28 @@ public class RightSideAuto extends LinearOpMode {
             return new PivotUp();
         }
 
+        public class PivotUp2 implements Action {
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    pivot.setPower(1);
+                    pivot.setTargetPosition((int) Constants.pivot_high_pose_2);
+                    pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                r=r*r + 1;
+                return pivot.isBusy();
+            }
+        }
+
+        public Action pivotUp2() {
+            return new PivotUp2();
+        }
+
         public class PivotDown implements Action {
             private boolean initialized = false;
             private int r = 0;
@@ -259,8 +281,8 @@ public class RightSideAuto extends LinearOpMode {
                  */
 
                 .splineToConstantHeading(new Vector2d(35, -30), Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(106, -58), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(108, -70), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(107, -58), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(108, -68), Math.toRadians(270))
                 //.splineToConstantHeading(new Vector2d(105, -73), Math.toRadians(180))
 
 
@@ -285,12 +307,12 @@ public class RightSideAuto extends LinearOpMode {
                 //.splineToConstantHeading(new Vector2d(102, -71), Math.toRadians(180))
                 //.strafeTo(new Vector2d(30, -71))
 
-                .splineToConstantHeading(new Vector2d(25, -71), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(25, -68), Math.toRadians(180))
 
 
                 .setTangent(Math.toRadians(0))
 
-                .lineToXSplineHeading(113, Math.toRadians(180))
+                .lineToXSplineHeading(105, Math.toRadians(180))
 
                 //.splineToConstantHeading(new Vector2d(106, -71), Math.toRadians(0)) test
 
@@ -307,11 +329,13 @@ public class RightSideAuto extends LinearOpMode {
                 .setTangent(0)
 
                 .splineToConstantHeading(new Vector2d(101, -96), Math.toRadians(0))//.splineToConstantHeading(new Vector2d(108, -87), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(102.4, -104), Math.toRadians(0))
-                .setTangent(180)
+                .splineToConstantHeading(new Vector2d(102.4, -100), Math.toRadians(270))
+
                 //.splineToConstantHeading(new Vector2d(103.3, -93), Math.toRadians(180))
                 //.splineToConstantHeading(new Vector2d(102, -110), Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(30, -104.5), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(30, -100.5), Math.toRadians(180))
+
+                .setTangent(Math.toRadians(90))
 
 //                .setTangent(0)
 //                .splineToConstantHeading(new Vector2d(108, -95), Math.toRadians(0))
@@ -326,22 +350,22 @@ public class RightSideAuto extends LinearOpMode {
 //                .splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
 
                 //.splineToConstantHeading(new Vector2d(7.414, -100), Math.toRadians(180))
-                .strafeTo(new Vector2d(7.38, -100))
+                .splineToConstantHeading(new Vector2d(6, -65), Math.toRadians(180))
 
                 .build();
 
-                //.setTangent(Math.toRadians(0))
-                //.splineToConstantHeading(new Vector2d(105, -80), Math.toRadians(-90))
-                //.splineToConstantHeading(new Vector2d(102, -90), Math.toRadians(180))
-                //.strafeTo(new Vector2d(30, -90))
-                //.setTangent(Math.toRadians(0))
-                //.splineToConstantHeading(new Vector2d(102, -90), Math.toRadians(0))
-                //.setTangent(Math.toRadians(0))
-                //.splineToConstantHeading(new Vector2d(105, -99), Math.toRadians(-90))
-                //.splineToConstantHeading(new Vector2d(102, -108), Math.toRadians(180))
-                //.splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
-                //.splineToConstantHeading(new Vector2d(6.3, -85), Math.toRadians(180))
-                //.build();
+        //.setTangent(Math.toRadians(0))
+        //.splineToConstantHeading(new Vector2d(105, -80), Math.toRadians(-90))
+        //.splineToConstantHeading(new Vector2d(102, -90), Math.toRadians(180))
+        //.strafeTo(new Vector2d(30, -90))
+        //.setTangent(Math.toRadians(0))
+        //.splineToConstantHeading(new Vector2d(102, -90), Math.toRadians(0))
+        //.setTangent(Math.toRadians(0))
+        //.splineToConstantHeading(new Vector2d(105, -99), Math.toRadians(-90))
+        //.splineToConstantHeading(new Vector2d(102, -108), Math.toRadians(180))
+        //.splineToConstantHeading(new Vector2d(30, -103), Math.toRadians(180))
+        //.splineToConstantHeading(new Vector2d(6.3, -85), Math.toRadians(180))
+        //.build();
 
 
 
@@ -363,13 +387,13 @@ public class RightSideAuto extends LinearOpMode {
 
                  */
 
-        Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(7.38, -90, Math.toRadians(180)))//new Pose2d(6.3, -85, Math.toRadians(180)))
+        Action SecondSpec = roadrunnerDrive.actionBuilder(new Pose2d(6, -65, Math.toRadians(180)))//keep at 7.38 instead of 6 - works for some reason //new Pose2d(6.3, -85, Math.toRadians(180)))
                 .setReversed(true) //second spec
                 .setTangent(Math.toRadians(0))
-                .splineTo(new Vector2d(20, -80), Math.toRadians(90))
-                .lineToYSplineHeading(0, Math.toRadians(0))
+                .splineTo(new Vector2d(20, -50), Math.toRadians(90))
+                .lineToYSplineHeading(1, Math.toRadians(0))
                 .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(63.35, 4), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(63.35, 8), Math.toRadians(0))
                 .build();
 
                 /*
@@ -379,14 +403,14 @@ public class RightSideAuto extends LinearOpMode {
                 .build();
                  */
 
-        Action ThirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 4, Math.toRadians(0)))
+        Action ThirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 8, Math.toRadians(0)))
                 .setReversed(false) //third spec pickup
                 .setTangent(Math.toRadians(180))
-                .splineTo(new Vector2d(20, 0), Math.toRadians(-90))
+                .splineTo(new Vector2d(20, -2), Math.toRadians(-90))
                 .lineToYSplineHeading(-58, Math.toRadians(180))
                 .setReversed(true)
                 .setTangent(Math.toRadians(-90))
-                .splineToConstantHeading(new Vector2d(10, -65), Math.toRadians(180))
+                //.splineToConstantHeading(new Vector2d(10, -65), Math.toRadians(180))
                 .splineToConstantHeading(new Vector2d(7.3, -65), Math.toRadians(180))
                 .build();
 
@@ -401,10 +425,11 @@ public class RightSideAuto extends LinearOpMode {
                 .setReversed(true) //third spec
                 .setTangent(Math.toRadians(0))
                 .splineTo(new Vector2d(20, -50), Math.toRadians(90))
-                .lineToYSplineHeading(0, Math.toRadians(0))
+                .lineToYSplineHeading(3, Math.toRadians(0))
                 .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(63.35, 6), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(63.7, 10.5), Math.toRadians(0))
                 .build();
+
                 /*
                 .setReversed(true) //third spec
                 .setTangent(Math.toRadians(0))
@@ -413,7 +438,14 @@ public class RightSideAuto extends LinearOpMode {
 
                  */
 
-        Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 6, Math.toRadians(0)))
+        Action Park = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 10.5, Math.toRadians(0)))
+                .setTangent(180)
+                .splineToConstantHeading(new Vector2d(10, -100), Math.toRadians(270))
+                .build();
+
+
+        /*FIX EVERYTHING BELOW
+        Action FourthSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(63.35, 6.5, Math.toRadians(0)))
                 .setReversed(false) //fourth spec pickup
                 .setTangent(Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(7.414, -90, Math.toRadians(180)), Math.toRadians(180))
@@ -438,6 +470,9 @@ public class RightSideAuto extends LinearOpMode {
                 .build();
 
 
+         */ //FIX EVERYTHING ABOVE
+
+
 
         waitForStart();
 
@@ -457,6 +492,12 @@ public class RightSideAuto extends LinearOpMode {
                 claw.openClaw(),
                 slide.slideIn()
         ));
+//
+//        Actions.runBlocking(new SequentialAction(
+//                slide.slideOut(),
+//                claw.openClaw(),
+//                slide.slideIn()
+//        ));
 
         Actions.runBlocking(new ParallelAction(
                 PushTicks,
@@ -466,7 +507,7 @@ public class RightSideAuto extends LinearOpMode {
                 )
         ));
 
-        sleep(10);
+        sleep(50);
 
         Actions.runBlocking(claw.closeClaw());
 
@@ -475,14 +516,12 @@ public class RightSideAuto extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(
                 pivot.pivotUp(),
                 wrist.wristReadySpecimen(),
-                SecondSpec
-        ));
-
-        Actions.runBlocking(new SequentialAction(
+                SecondSpec,
                 slide.slideOut(),
                 claw.openClaw(),
                 slide.slideIn()
         ));
+
 
         Actions.runBlocking(new ParallelAction(
                 ThirdSpecPickup,
@@ -492,14 +531,14 @@ public class RightSideAuto extends LinearOpMode {
                 )
         ));
 
-        sleep(10);
+        sleep(50);
 
         Actions.runBlocking(claw.closeClaw());
 
         sleep(200);
 
         Actions.runBlocking(new SequentialAction(
-                pivot.pivotUp(),
+                pivot.pivotUp2(),
                 wrist.wristReadySpecimen(),
                 ThirdSpec
         ));
@@ -507,7 +546,11 @@ public class RightSideAuto extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(
                 slide.slideOut(),
                 claw.openClaw(),
-                slide.slideIn()
+                slide.slideIn(),
+                new ParallelAction(
+                        pivot.pivotDown(),
+                        Park
+                )
         ));
 
         /*
@@ -939,11 +982,11 @@ public class RightSideAuto extends LinearOpMode {
      */
 
     //public void openClaw() {
-        //clawServo.setPosition(0.5);
+    //clawServo.setPosition(0.5);
     //}
 
     //public void closeClaw() {
-        //clawServo.setPosition(1);
+    //clawServo.setPosition(1);
     //}
 
 

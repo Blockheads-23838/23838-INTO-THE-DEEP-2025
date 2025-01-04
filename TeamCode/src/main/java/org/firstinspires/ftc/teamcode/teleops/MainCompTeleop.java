@@ -89,7 +89,7 @@ public class MainCompTeleop extends LinearOpMode {
     double pivotAfterAuto = 0;
 
     private Servo clawServo = null;
-
+// Sigma Rizz ohio gyatt skibidi
     /*
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
