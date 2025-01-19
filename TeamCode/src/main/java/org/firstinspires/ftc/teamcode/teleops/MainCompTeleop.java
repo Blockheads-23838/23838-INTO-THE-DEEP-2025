@@ -34,13 +34,11 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teleops.Constants;
 
 
 /*
@@ -74,50 +72,49 @@ import org.firstinspires.ftc.teamcode.teleops.Constants;
 @TeleOp(name="Main Comp Teleop", group="Linear OpMode")
 public class MainCompTeleop extends LinearOpMode {
 
-    // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
 
-    private DcMotor slide = null;
-    private DcMotorEx pivot = null;
+    public Servo linkage1 = null;
+    public Servo linkage2 = null;
+    public double linkagePose = 0;
 
-    private Servo wrist = null;
+    public Servo specWrist = null;
+    public double armPower = 0;
+    public double specWristPose = 0;
+    public enum armPose {
+        specIntake,
+        mid,
+        score
+    };
+    armPose arm;
 
-    double servoSetpoint = 0;
+    public CRServo intake = null;
+    public double intakePower = 0;
+    public boolean intakeOn = false;
+    public boolean putPieceOut = false;
+    public double intakeWristPose = 0;
+    public Servo intakeWrist = null;
 
-    double slideSetpoint = 0;
+    public double t;
 
-    double pivotAfterAuto = 0;
 
-    private Servo clawServo = null;
-// Sigma Rizz ohio gyatt skibidi
-    /*
-    private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
-    */
-
-    @Override
+        @Override
     public void runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        /*
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "left_back");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back");
 
-         */
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
 
-        slide = hardwareMap.get(DcMotor.class, "slide");
-        pivot = hardwareMap.get(DcMotorEx.class, "pivot");
+        linkage1 = hardwareMap.get(Servo.class, "linkage1");
+        linkage2 = hardwareMap.get(Servo.class, "linkage2");
 
-        wrist = hardwareMap.get(Servo.class, "wrist");
+        intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
 
-        clawServo = hardwareMap.get(Servo.class, "claw");
+        specWrist = hardwareMap.get(Servo.class, "specWrist");
+
+        intake = hardwareMap.get(CRServo.class, "intake");
 
 
         // ########################################################################################
@@ -130,201 +127,145 @@ public class MainCompTeleop extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        /*
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
-         */
-        slide.setDirection(DcMotor.Direction.REVERSE);
-        pivot.setDirection(DcMotor.Direction.REVERSE);
+
+
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
-        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        /*
-        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-         */
 
 
         while (!isStarted() && !isStopRequested()) {
-            //telemetry.addData("pivot position: ", pivot.getCurrentPosition());
-            telemetry.addData("pivot position (encoder counts):", pivot.getCurrentPosition());
-            telemetry.addData("slide position (encoder counts): ", slide.getCurrentPosition());
-            telemetry.addData("claw position", clawServo.getPosition());
+
+
             telemetry.update();
         }
         runtime.reset();
 
-
+        /*
         if (opModeIsActive()) {
             clawServo.setPosition(1);
 
             //wrist.setPosition(0);
         }
 
+        */
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             handleDrivetrain(drive);
-            handleSlide();
-            handlePivot();
-            handleClaw();
-            handleWrist();
+            handleIntake();
+            handleLinkages();
+            handleArm();
 
-
-            telemetry.addData("pivot position (encoder counts):", pivot.getCurrentPosition());
-            telemetry.addData("slide position (encoder counts): ", slide.getCurrentPosition());
-            telemetry.addData("wrist position", wrist.getPosition());
-            telemetry.addData("claw position", clawServo.getPosition());
-
+            telemetry.addData("linkage pose", linkagePose);
+            telemetry.addData("actual linkage 1", linkage1.getPosition());
+            telemetry.addData("actual linkage 2", linkage2.getPosition());
             telemetry.update();
 
             sleep(10);
         }
     }
 
-    public void handleWrist() {
-        servoSetpoint =  servoSetpoint + (gamepad2.left_trigger - gamepad2.right_trigger) * 0.1;
 
-        if (gamepad2.left_bumper) { //intake specimen pose
-            servoSetpoint = 1-0.6631;
+
+    public void handleIntake() {
+        if (gamepad2.right_trigger > 0.2) { //intake deploy
+            putPieceOut = false;
+            intakeOn = true;
+        }
+        else if (gamepad2.left_trigger > 0.2) { //put sample out the back
+            putPieceOut = true;
+            intakeOn = false;
+
+        }
+        else { //stationary
+            intakeOn = false;
         }
 
-        else if (gamepad2.dpad_up) { //ready specimen while pivot goes up - all linear slide needs to do is push now and the spec will be scored.
-            servoSetpoint = 0.5;
+        if (intakeOn) {
+            intakePower = -1;
+            intakeWristPose = 1;
         }
-
-        /*
-        else if (gamepad2.right_bumper) { //score on high rung
-            servoSetpoint = 1-0.96;
+        else if (putPieceOut) {
+            intakeWristPose = 0;
+            if (linkagePose <= 0.05 && intakePower == -1) {
+                putPieceOut = false;
+            }
+            if (linkagePose <= 0.05) {
+                intakePower = 1;
+            }
         }
-        */
-
-
-        servoSetpoint = Math.max(Math.min(servoSetpoint, 0.96), 0);
-        telemetry.addData("servo setpoint: ", servoSetpoint);
-        if (wrist.getPosition() != servoSetpoint) {
-            wrist.setPosition(servoSetpoint);
-        }
-    }
-
-
-    public void handleSlide() {
-        if (gamepad2.right_bumper) { //SCORE SPECIMEN ON HIGH RUNG
-            slideSetpoint = Constants.slide_specimen_high_rung; //
-        }
-
-        slideSetpoint -= (gamepad2.right_stick_y * 60); //add manual control
-
-        if (slideSetpoint <= 5) {
-            slideSetpoint = 5;
-        }
-
-        slide.setTargetPosition((int) slideSetpoint);
-
-        if (Math.abs(slide.getCurrentPosition() - slideSetpoint) > 10) {
-            slide.setPower(1);
-        }
-
         else {
-            slide.setPower(0);
+            intakePower = 0;
         }
 
-        /*
-        else if (pivot.getCurrentPosition() < (Constants.pivot_high_pose - 20)){
-            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            slide.setPower(-gamepad2.right_stick_y * 1.5);
-        }
-
-         */
-
-        /*
-        else if (gamepad2.dpad_down) {
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            slide.setTargetPosition((int) Constants.slide_retracted_pose);
-            slide.setPower(1);
-        }
-        */
-
-
-
-
-
-        /*
-        if (gamepad2.dpad_up) {
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            slide.setTargetPosition((int) Constants.slide_specimen_high_rung);
-            slide.setPower(1);
-        } else if (gamepad2.dpad_down) {
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            slide.setTargetPosition((int) Constants.slide_retracted_pose);
-            slide.setPower(1);
-
-        }
-        else if (gamepad2.right_stick_y > 0.1 || gamepad2.right_stick_y < -0.1) {
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            slide.setPower(-gamepad2.right_stick_y);
-        }
-
-         */
-    }
-
-    public void handleClaw() {
-
-        //b is close; a is open
-
-        if (gamepad2.a) {
-            clawServo.setPosition(0.5);
-        }
-        else if (gamepad2.b) {
-            clawServo.setPosition(1);
-        }
-
-    }
-
-    public void handlePivot() {
-        //pivot.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(Constants.pivot_p, Constants.pivot_i, Constants.pivot_d, Constants.pivot_f));
-        if (gamepad2.y) {
-            pivotAfterAuto = Constants.pivot_high_pose;
-        }
-
-        if (gamepad2.dpad_up) {
-            pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            pivot.setTargetPosition(((int) Constants.pivot_high_pose) - (int)(pivotAfterAuto));
-            pivot.setPower(1);
-
-        } else if (gamepad2.dpad_down) {
-            pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            pivot.setTargetPosition(((int) Constants.pivot_intake_pose) - (int)(pivotAfterAuto));
-            pivot.setPower(1);
-
-        }
+        intake.setPower(intakePower);
+        intakeWrist.setPosition(intakeWristPose);
 
     }
 
 
+    public void handleArm() {
+
+        if (gamepad2.left_bumper) {
+            t = runtime.time();
+            arm = armPose.specIntake;
+        }
+        if (gamepad2.right_bumper) {
+            t = runtime.time();
+
+            if (arm == armPose.specIntake) {
+                arm = armPose.mid;
+            }
+            else if (arm == armPose.mid) {
+                arm = armPose.score;
+            }
+        }
+
+        if (arm == armPose.specIntake) {
+            //move arm servos - set power to something - needs time condition
+            specWristPose = 0;
+            //do claw stuff too - needs time condition.
+        }
+        else if (arm == armPose.mid) {
+            //move arm servos - set power to something
+            if (runtime.time() - t >= 0.4) {
+                specWristPose = 0.7;
+            }
+
+        }
+        else if (arm == armPose.score) {
+            //move arm servos - set power to something - needs time condition
+            specWristPose = 0.7;
+            //do claw stuff too - needs time condition.
+        }
+
+        specWrist.setPosition(specWristPose);
+        //set powers of arm servos
+        //set position of claw.
+    }
+
+
+    public void handleLinkages() {
+        linkagePose += -0.01*gamepad2.right_stick_y;
+        if (linkagePose <= 0) {
+            linkagePose = 0.01;
+        }
+        else if (linkagePose >= 0.25) {
+            linkagePose = 0.25;
+        }
+
+        if (putPieceOut) {
+            linkagePose = 0.01;
+        }
+        linkage1.setPosition(linkagePose);
+        linkage2.setPosition(linkagePose);
+    }
 
 
     public void handleDrivetrain(MecanumDrive drive) {
