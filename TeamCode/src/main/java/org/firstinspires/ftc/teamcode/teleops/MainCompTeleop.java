@@ -78,15 +78,20 @@ public class MainCompTeleop extends LinearOpMode {
     public Servo linkage2 = null;
     public double linkagePose = 0;
 
+    public CRServo arm1 = null; //closer side to spec claw
+    public CRServo arm2 = null; //closer side to sample intake
     public Servo specWrist = null;
     public double armPower = 0;
     public double specWristPose = 0;
     public enum armPose {
         specIntake,
-        mid,
-        score
+        //mid,
+        score,
+        none
     };
-    armPose arm;
+    armPose arm = armPose.none;
+    public Servo claw = null;
+    public double clawPose = 0;
 
     public CRServo intake = null;
     public double intakePower = 0;
@@ -115,6 +120,10 @@ public class MainCompTeleop extends LinearOpMode {
         specWrist = hardwareMap.get(Servo.class, "specWrist");
 
         intake = hardwareMap.get(CRServo.class, "intake");
+
+        arm1 = hardwareMap.get(CRServo.class, "arm1");
+        arm2 = hardwareMap.get(CRServo.class, "arm2");
+        claw = hardwareMap.get(Servo.class, "claw");
 
 
         // ########################################################################################
@@ -193,7 +202,7 @@ public class MainCompTeleop extends LinearOpMode {
         }
         else if (putPieceOut) {
             intakeWristPose = 0;
-            if (linkagePose <= 0.05 && intakePower == -1) {
+            if (linkagePose <= 0.05 && intakePower == 1) {
                 putPieceOut = false;
             }
             if (linkagePose <= 0.05) {
@@ -213,41 +222,80 @@ public class MainCompTeleop extends LinearOpMode {
     public void handleArm() {
 
         if (gamepad2.left_bumper) {
-            t = runtime.time();
-            arm = armPose.specIntake;
+            // = runtime.time();
+
+            if (arm != armPose.specIntake) {
+                arm = armPose.specIntake;
+            }
         }
         if (gamepad2.right_bumper) {
-            t = runtime.time();
-
+            /*
             if (arm == armPose.specIntake) {
                 arm = armPose.mid;
             }
-            else if (arm == armPose.mid) {
+            else if (arm == armPose.mid && runtime.time() - t >= 0.2) {
                 arm = armPose.score;
             }
+
+             */
+
+            if (arm != armPose.score && arm != armPose.none) {
+                arm = armPose.score;
+            }
+
+            t = runtime.time();
+
         }
 
         if (arm == armPose.specIntake) {
             //move arm servos - set power to something - needs time condition
+            if (gamepad2.left_bumper) {//if (runtime.time() - t <= 1.5) {
+                armPower = -1;
+            }
+            else {
+                armPower = 0;
+            }
             specWristPose = 0;
             //do claw stuff too - needs time condition.
+            clawPose = 0; //open claw;
         }
+        /*
         else if (arm == armPose.mid) {
             //move arm servos - set power to something
+            clawPose = 0; //close claw
+            if (runtime.time() - t <= 0.2) {
+                armPower = 1;
+            }
+            else {
+                armPower = 0;
+            }
             if (runtime.time() - t >= 0.4) {
-                specWristPose = 0.7;
+                specWristPose = 0.63;
             }
 
         }
+
+         */
         else if (arm == armPose.score) {
+            clawPose = 0.23;
             //move arm servos - set power to something - needs time condition
-            specWristPose = 0.7;
+            if (gamepad2.right_bumper) {//if (runtime.time() - t <= 0.6) {
+                armPower = 1;
+            }
+            else {
+                armPower = 0;
+            }
+            //if (runtime.time() - t >= 0.2) {
+                specWristPose = 0.63;
+            //}
             //do claw stuff too - needs time condition.
         }
 
+
+        claw.setPosition(clawPose);
+        arm1.setPower(armPower);
+        arm2.setPower(-armPower);
         specWrist.setPosition(specWristPose);
-        //set powers of arm servos
-        //set position of claw.
     }
 
 
