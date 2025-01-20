@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
@@ -93,12 +94,17 @@ public class MainCompTeleop extends LinearOpMode {
     public Servo claw = null;
     public double clawPose = 0;
 
+    public DcMotor armMotor = null; //TEST JUST IN CASE WE HAVE TO USE A MOTOR!!
+    
+
     public CRServo intake = null;
     public double intakePower = 0;
     public boolean intakeOn = false;
     public boolean putPieceOut = false;
     public double intakeWristPose = 0;
     public Servo intakeWrist = null;
+
+    public DcMotor
 
     public double t;
 
@@ -124,6 +130,10 @@ public class MainCompTeleop extends LinearOpMode {
         arm1 = hardwareMap.get(CRServo.class, "arm1");
         arm2 = hardwareMap.get(CRServo.class, "arm2");
         claw = hardwareMap.get(Servo.class, "claw");
+
+        armMotor = hardwareMap.get(DcMotor.class, "armMotor"); //TEST JUST IN CASE WE NEED TO SWITCH ARM TO MOTOR!
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
         // ########################################################################################
@@ -224,7 +234,7 @@ public class MainCompTeleop extends LinearOpMode {
         if (gamepad2.left_bumper) {
             // = runtime.time();
 
-            if (arm != armPose.specIntake) {
+            if (arm != armPose.specIntake && !armMotor.isBusy()) {
                 arm = armPose.specIntake;
             }
         }
@@ -239,7 +249,7 @@ public class MainCompTeleop extends LinearOpMode {
 
              */
 
-            if (arm != armPose.score && arm != armPose.none) {
+            if (arm != armPose.score && arm != armPose.none && !armMotor.isBusy()) {
                 arm = armPose.score;
             }
 
@@ -258,6 +268,10 @@ public class MainCompTeleop extends LinearOpMode {
             specWristPose = 0;
             //do claw stuff too - needs time condition.
             clawPose = 0; //open claw;
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(0); //CHANGE 0 FOR CORRECT TARGET POSITION
+            
         }
         /*
         else if (arm == armPose.mid) {
@@ -289,6 +303,9 @@ public class MainCompTeleop extends LinearOpMode {
                 specWristPose = 0.63;
             //}
             //do claw stuff too - needs time condition.
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(0); //CHANGE 0 FOR CORRECT TARGET POSITION
         }
 
 
