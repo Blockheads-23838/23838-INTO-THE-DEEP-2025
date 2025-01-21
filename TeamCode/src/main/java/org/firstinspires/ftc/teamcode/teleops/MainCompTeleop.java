@@ -140,7 +140,7 @@ public class MainCompTeleop extends LinearOpMode {
         armMotor = hardwareMap.get(DcMotor.class, "armMotor"); //TEST JUST IN CASE WE NEED TO SWITCH ARM TO MOTOR!
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         // ########################################################################################
@@ -257,7 +257,7 @@ public class MainCompTeleop extends LinearOpMode {
         if (gamepad2.left_bumper) {
             //t = runtime.time();
 
-            if (arm != armPose.specIntake) {
+            if (arm != armPose.specIntake && !armMotor.isBusy()) {
                 arm = armPose.specIntake;
                 t = runtime.time();
                 armMotorTarget = armMotor.getCurrentPosition();
@@ -266,13 +266,13 @@ public class MainCompTeleop extends LinearOpMode {
         }
         if (gamepad2.right_bumper) {
 
-            if (arm != armPose.mid) {
+            if (arm != armPose.mid && !armMotor.isBusy()) {
                 arm = armPose.mid;
                 t = runtime.time();
                 armMotorTarget = armMotor.getCurrentPosition();
             }
 
-            if (arm != armPose.score && arm != armPose.none) {
+            if (arm != armPose.score && arm != armPose.none && !armMotor.isBusy()) {
                 arm = armPose.score;
                 t = runtime.time();
                 armMotorTarget = armMotor.getCurrentPosition();
@@ -296,14 +296,15 @@ public class MainCompTeleop extends LinearOpMode {
             //do claw stuff too - needs time condition.
             clawPose = 0; //open claw;
 
-            if (runtime.time() - t >= 0.5) {
-                if (armMotorTarget <= 320) {
+            //if (runtime.time() - t >= 0.5) {
+                if (armMotorTarget <= 320 && !armMotor.isBusy()) {
                     armMotorTarget += 10;
                 }
+                armMotor.setPower(1);
                 armMotor.setTargetPosition((int)armMotorTarget);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armMotor.setPower(1);
-            }
+                
+            //}
             
         }
         else if (arm == armPose.mid) {
@@ -323,16 +324,17 @@ public class MainCompTeleop extends LinearOpMode {
 
             clawPose = 0.23;
 
-            if (armMotorTarget <= 110) {
+            if (armMotorTarget <= 110  && !armMotor.isBusy()) {
                 armMotorTarget += 10;
             }
-            else if (armMotorTarget >= 130) {
+            else if (armMotorTarget >= 130  && !armMotor.isBusy()) {
                 armMotorTarget -= 10;
             }
 
+            armMotor.setPower(1);
             armMotor.setTargetPosition((int)armMotorTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armMotor.setPower(1);
+            
         }
 
 
@@ -353,16 +355,17 @@ public class MainCompTeleop extends LinearOpMode {
 
             clawPose = 0.23;
 
-            if (armMotorTarget <= 70) {
+            if (armMotorTarget <= 70  && !armMotor.isBusy()) {
                 armMotorTarget += 10;
             }
-            else if (armMotorTarget >= 90) {
+            else if (armMotorTarget >= 90  && !armMotor.isBusy()) {
                 armMotorTarget -= 10;
             }
 
-            armMotor.setTargetPosition((int) armMotorTarget); //CHANGE 0 FOR CORRECT TARGET POSITION
-            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             armMotor.setPower(1);
+            armMotor.setTargetPosition((int) armMotorTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            
         }
 
 
