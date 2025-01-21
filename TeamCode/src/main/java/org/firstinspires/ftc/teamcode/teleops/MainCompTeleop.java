@@ -79,14 +79,17 @@ public class MainCompTeleop extends LinearOpMode {
     public Servo linkage2 = null;
     public double linkagePose = 0;
 
+    /*
     public CRServo arm1 = null; //closer side to spec claw
     public CRServo arm2 = null; //closer side to sample intake
+
+     */
     public Servo specWrist = null;
     public double armPower = 0;
     public double specWristPose = 0;
     public enum armPose {
         specIntake,
-        //mid,
+        mid,
         score,
         none
     };
@@ -94,7 +97,9 @@ public class MainCompTeleop extends LinearOpMode {
     public Servo claw = null;
     public double clawPose = 0;
 
-    public DcMotor armMotor = null; //TEST JUST IN CASE WE HAVE TO USE A MOTOR!!
+    public DcMotor armMotor = null;
+    public double armMotorTarget = 0;
+
     
 
     public CRServo intake = null;
@@ -103,8 +108,6 @@ public class MainCompTeleop extends LinearOpMode {
     public boolean putPieceOut = false;
     public double intakeWristPose = 0;
     public Servo intakeWrist = null;
-
-    public DcMotor
 
     public double t;
 
@@ -127,13 +130,17 @@ public class MainCompTeleop extends LinearOpMode {
 
         intake = hardwareMap.get(CRServo.class, "intake");
 
+        /*
         arm1 = hardwareMap.get(CRServo.class, "arm1");
         arm2 = hardwareMap.get(CRServo.class, "arm2");
+         */
+
         claw = hardwareMap.get(Servo.class, "claw");
 
         armMotor = hardwareMap.get(DcMotor.class, "armMotor"); //TEST JUST IN CASE WE NEED TO SWITCH ARM TO MOTOR!
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         // ########################################################################################
@@ -181,9 +188,12 @@ public class MainCompTeleop extends LinearOpMode {
             handleLinkages();
             handleArm();
 
+
             telemetry.addData("linkage pose", linkagePose);
             telemetry.addData("actual linkage 1", linkage1.getPosition());
             telemetry.addData("actual linkage 2", linkage2.getPosition());
+            telemetry.addData("arm motor", armMotor.getCurrentPosition());
+            telemetry.addData("arm target", armMotorTarget);
             telemetry.update();
 
             sleep(10);
@@ -221,6 +231,7 @@ public class MainCompTeleop extends LinearOpMode {
         }
         else {
             intakePower = 0;
+            intakeWristPose = 0;
         }
 
         intake.setPower(intakePower);
@@ -228,96 +239,142 @@ public class MainCompTeleop extends LinearOpMode {
 
     }
 
+    /*
+    public void handleClaw() {
+            if (gamepad2.a) { //open
+                claw.setPosition(0);
+            }
+            else if (gamepad2.b) { //close
+                claw.setPosition(0.23);
+            }
+    }
+
+     */
+
 
     public void handleArm() {
 
         if (gamepad2.left_bumper) {
-            // = runtime.time();
+            //t = runtime.time();
 
-            if (arm != armPose.specIntake && !armMotor.isBusy()) {
+            if (arm != armPose.specIntake) {
                 arm = armPose.specIntake;
+                t = runtime.time();
+                armMotorTarget = armMotor.getCurrentPosition();
+
             }
         }
         if (gamepad2.right_bumper) {
-            /*
-            if (arm == armPose.specIntake) {
+
+            if (arm != armPose.mid) {
                 arm = armPose.mid;
+                t = runtime.time();
+                armMotorTarget = armMotor.getCurrentPosition();
             }
-            else if (arm == armPose.mid && runtime.time() - t >= 0.2) {
+
+            if (arm != armPose.score && arm != armPose.none) {
                 arm = armPose.score;
+                t = runtime.time();
+                armMotorTarget = armMotor.getCurrentPosition();
             }
 
-             */
 
-            if (arm != armPose.score && arm != armPose.none && !armMotor.isBusy()) {
-                arm = armPose.score;
-            }
-
-            t = runtime.time();
 
         }
 
         if (arm == armPose.specIntake) {
             //move arm servos - set power to something - needs time condition
-            if (gamepad2.left_bumper) {//if (runtime.time() - t <= 1.5) {
+            /*if (gamepad2.left_bumper) {//if (runtime.time() - t <= 1.5) {
                 armPower = -1;
             }
             else {
                 armPower = 0;
             }
+
+             */
             specWristPose = 0;
             //do claw stuff too - needs time condition.
             clawPose = 0; //open claw;
 
-            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armMotor.setTargetPosition(0); //CHANGE 0 FOR CORRECT TARGET POSITION
+            if (runtime.time() - t >= 0.5) {
+                if (armMotorTarget <= 320) {
+                    armMotorTarget += 10;
+                }
+                armMotor.setTargetPosition((int)armMotorTarget);
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armMotor.setPower(1);
+            }
             
         }
-        /*
         else if (arm == armPose.mid) {
             //move arm servos - set power to something
-            clawPose = 0; //close claw
+            /*
             if (runtime.time() - t <= 0.2) {
                 armPower = 1;
             }
             else {
                 armPower = 0;
             }
-            if (runtime.time() - t >= 0.4) {
+
+             */
+            if (runtime.time() - t >= 0.5) {
                 specWristPose = 0.63;
             }
 
+            clawPose = 0.23;
+
+            if (armMotorTarget <= 110) {
+                armMotorTarget += 10;
+            }
+            else if (armMotorTarget >= 130) {
+                armMotorTarget -= 10;
+            }
+
+            armMotor.setTargetPosition((int)armMotorTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setPower(1);
         }
 
-         */
+
         else if (arm == armPose.score) {
-            clawPose = 0.23;
             //move arm servos - set power to something - needs time condition
+            /*
             if (gamepad2.right_bumper) {//if (runtime.time() - t <= 0.6) {
                 armPower = 1;
             }
             else {
                 armPower = 0;
             }
-            //if (runtime.time() - t >= 0.2) {
-                specWristPose = 0.63;
-            //}
-            //do claw stuff too - needs time condition.
 
+             */
+            //if (runtime.time() - t >= 0.2) {
+                //specWristPose = 0.63;
+            //}
+
+            clawPose = 0.23;
+
+            if (armMotorTarget <= 70) {
+                armMotorTarget += 10;
+            }
+            else if (armMotorTarget >= 90) {
+                armMotorTarget -= 10;
+            }
+
+            armMotor.setTargetPosition((int) armMotorTarget); //CHANGE 0 FOR CORRECT TARGET POSITION
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armMotor.setTargetPosition(0); //CHANGE 0 FOR CORRECT TARGET POSITION
+            armMotor.setPower(1);
         }
 
 
         claw.setPosition(clawPose);
-        arm1.setPower(armPower);
-        arm2.setPower(-armPower);
+        //arm1.setPower(armPower);
+        //arm2.setPower(-armPower);
         specWrist.setPosition(specWristPose);
     }
 
 
     public void handleLinkages() {
-        linkagePose += -0.01*gamepad2.right_stick_y;
+        linkagePose += -0.035*gamepad2.right_stick_y;
         if (linkagePose <= 0) {
             linkagePose = 0.01;
         }
