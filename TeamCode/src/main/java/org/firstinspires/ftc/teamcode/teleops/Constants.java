@@ -4,8 +4,10 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public  class Constants {
+
     // ------------ FIELD -------------
     public static double length_of_block = 878;
+
     //ticks
     // ------------ PIVOT -------------
     public static double pivot_intake_pose = 55;//30.680851, 80; //encoder counts; lowest the arm should go

@@ -117,10 +117,16 @@ public class MainCompTeleop extends LinearOpMode {
 
     public double r = 0;
 
-    public double kP = 60;
-    public double kI = 0;
-    public double kD = 40;
+    public double kP = 0.00001;
+    public double kI = 0.4;
+    public double kD = 8;
     public double kF = 0;
+
+    public double kG = -0.01;
+
+    public double thetaInit = Math.toRadians(-38.1176);
+    public double theta = thetaInit;
+    public double armError = 0;
 
     public Servo sweep = null;
 
@@ -159,10 +165,10 @@ public class MainCompTeleop extends LinearOpMode {
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        armMotor.setTargetPosition(armMotor.getCurrentPosition());
+        //armMotor.setTargetPosition(armMotor.getCurrentPosition());
 
 
         // ########################################################################################
@@ -225,38 +231,64 @@ public class MainCompTeleop extends LinearOpMode {
                 specWrist.setPosition(0);
             }
 
+
+            /*
             if (gamepad2.left_bumper) {
                 armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
                 armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                armMotor.setTargetPosition(-337);
+                armMotor.setTargetPosition(-325);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
-            /*
+
             else if (gamepad2.right_bumper) {
                 armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
                 armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                armMotor.setTargetPosition(-250);
+                armMotor.setTargetPosition(-240);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
 
              */
 
+            //base PID
+            if (gamepad2.left_bumper) {
+                armMotorTarget = -325; //just trying -250 for now.
+                armError = armMotorTarget - armMotor.getCurrentPosition();
+                armPower = kP * armError + kG * Math.cos(theta);
+                armMotor.setPower(armPower);
+            }
+            else {
+                armMotor.setPower(kG * Math.cos(theta));
+            }
 
-            armMotor.setPower(1);
+            armError = armMotorTarget - armMotor.getCurrentPosition();
+
+
+
+            //armMotor.setPower(1);
+
+            theta = thetaInit + (-1.0 * Math.PI * armMotor.getCurrentPosition() / 255);
 
 
 
 
-            telemetry.addData("linkage pose", linkagePose);
+
+            telemetry.addData("arm angle degrees", Math.toDegrees(theta));
+            telemetry.addData("arm power calculated", armPower);
+            telemetry.addData("arm encoder pose", armMotor.getCurrentPosition());
+            telemetry.addData("arm error", armError);
+
+            telemetry.addData("arm motor power", armMotor.getPower());
             telemetry.addData("actual linkage 1", linkage1.getPosition());
             telemetry.addData("actual linkage 2", linkage2.getPosition());
             telemetry.addData("wrist", specWrist.getPosition());
-            telemetry.addData("arm pose", arm);
+            telemetry.addData("arm pose enum", arm);
+            /*
             telemetry.addData("arm motor pidf", armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
             telemetry.addData("arm motor target pos", armMotor.getTargetPosition());
             telemetry.addData("arm motor", armMotor.getCurrentPosition());
-            telemetry.addData("arm motor power", armMotor.getPower());
-            //telemetry.addData("arm target", armMotorTarget);
+
+             */
+            telemetry.addData("arm target", armMotorTarget);
             telemetry.update();
 
             sleep(10);
@@ -388,8 +420,8 @@ public class MainCompTeleop extends LinearOpMode {
         if (linkagePose <= 0) {
             linkagePose = 0.01;
         }
-        else if (linkagePose >= 0.34) {
-            linkagePose = 0.34;
+        else if (linkagePose >= 0.2) {
+            linkagePose = 0.2;
         }
 
         if (putPieceOut) {
