@@ -198,6 +198,7 @@ public class MainCompTeleop extends LinearOpMode {
 
             telemetry.update();
         }
+        waitForStart();
         runtime.reset();
 
         /*
