@@ -35,6 +35,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -81,21 +82,10 @@ public class ArmMotorTest extends LinearOpMode {
 
     public DcMotorEx armMotor = null;
     public double armMotorTarget = 0;
-    public double armPower = 0;
 
-    public int armPose = 0;
-
-
-    public double kG = -0.01;
-    public double kP2 = 0.0000001;
-
-    public double thetaInit = Math.toRadians(-38.1176);
-    public double theta = thetaInit;
-    public double armError = 0;
-
-    public double kP = 9.2; //10
-    public double kI = 0.7; //1.25
-    public double kD = 1.7; //2.5
+    public double kP = 10; //10
+    public double kI = 0; //1.25
+    public double kD = 0; //2.5
     public double kF = 0;
 
     PIDFCoefficients pidfCoeff = new PIDFCoefficients(kP, kI, kD, kF);
@@ -105,11 +95,7 @@ public class ArmMotorTest extends LinearOpMode {
     public void runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
-        // to the names assigned during the robot configuration step on the DS or RC devices.
-
-
-
-
+        // to the names assigned during the robot configuration step on the DS or RC devices
 
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -117,121 +103,35 @@ public class ArmMotorTest extends LinearOpMode {
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setDirection(DcMotor.Direction.FORWARD);
-
-        //armMotor.setTargetPosition(armMotor.getCurrentPosition());
-
-
-        // ########################################################################################
-        // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
-        // ########################################################################################
-        // Most robots need the motors on one side to be reversed to drive forward.
-        // The motor reversals shown here are for a "direct drive" robot (the wheels turn the same direction as the motor shaft)
-        // If your robot has additional gear reductions or uses a right-angled drive, it's important to ensure
-        // that your motors are turning in the correct direction.  So, start out with the reversals here, BUT
-        // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
-        // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
-        // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-
-
-
+        // armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-
-
-
-
         while (!isStarted() && !isStopRequested()) {
-
-
             telemetry.update();
         }
         runtime.reset();
 
-        /*
-        if (opModeIsActive()) {
-            clawServo.setPosition(1);
-
-            //wrist.setPosition(0);
-        }
-
-        */
-
         //CLOCKWISE = POSITIVE MOTOR MOVEMENT IF MOTOR IS FORWARD!!!!!
 
-
         // run until the end of the match (driver presses STOP)
+        int counter = 0;
         while (opModeIsActive()) {
+            counter++;
+            sleep(20); // 50x per second
 
-            //armMotor.setPower(gamepad2.left_stick_y);
 
-
-
-            if (gamepad2.left_bumper && armPose != 1) {
-                armPose = 1;
-            }
-            else if (gamepad2.right_bumper && armPose == 1) {
-                armPose = 2;
-            }
-            else if (gamepad2.right_bumper && armPose == 2 && Math.abs(armMotor.getCurrentPosition() - armMotor.getTargetPosition()) < 30) {
-                armPose = 3;
-            }
-
-            if (armPose == 1) {
-                armMotor.setTargetPosition(-325);
+            if (counter % 400 > 200) {
+                armMotor.setTargetPosition((int) (-5281 * 0.6));
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-                //do stuff with claw and wrist
-            }
-            else if (armPose == 2) {
-                armMotor.setTargetPosition(-240);
+            } else {
+                armMotor.setTargetPosition(0);
                 armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-                //do stuff with claw and wrist
-            }
-            else if (armPose == 3) {
-                armMotor.setTargetPosition(-100);
-                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-                //do stuff with claw and wrist
-            }
-            else {
-                armMotor.setTargetPosition(armMotor.getCurrentPosition());
-                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
             }
 
-            armMotor.setPower(-0.5);
-
-
-
-
-            /*
-            //base PID
-            if (gamepad2.left_bumper) {
-                armMotorTarget = -325;
-                armError = armMotorTarget - armMotor.getCurrentPosition();
-                armPower = kP2 * armError * Math.abs(armError) + kG * Math.cos(theta) * Math.cos(theta);
-                armMotor.setPower(armPower);
-            }
-            else {
-                armMotor.setPower(kG * Math.cos(theta));
-            }
-
-            armError = armMotorTarget - armMotor.getCurrentPosition();
-
-
-            theta = thetaInit + (-1.0 * Math.PI * armMotor.getCurrentPosition() / 255);
-
-
-
-            telemetry.addData("arm angle degrees", Math.toDegrees(theta));
-
-            telemetry.addData("arm error", armError);
-
-             */
+            armMotor.setPower(1);
 
             telemetry.addData("arm motor power", armMotor.getPower());
 
@@ -247,7 +147,4 @@ public class ArmMotorTest extends LinearOpMode {
 
         }
     }
-
-
-
 }

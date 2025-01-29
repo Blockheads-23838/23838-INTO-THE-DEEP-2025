@@ -81,26 +81,13 @@ public class MainCompTeleop extends LinearOpMode {
     public Servo linkage2 = null;
     public double linkagePose = 0;
 
-    /*
-    public CRServo arm1 = null; //closer side to spec claw
-    public CRServo arm2 = null; //closer side to sample intake
-
-     */
     public Servo specWrist = null;
     public double armPower = 0;
-    public double specWristPose = 0;
-    public enum armPose {
-        specIntake,
-        mid,
-        score,
-        none
-    };
-    armPose arm = armPose.none;
+    public int armPose = 0;
     public Servo claw = null;
-    public double clawPose = 0;
 
     public DcMotorEx armMotor = null;
-    public double armMotorTarget = 0;
+    public int armTarget = 0;
 
     public boolean leftBump = false;
     public boolean rightBump = false;
@@ -112,25 +99,8 @@ public class MainCompTeleop extends LinearOpMode {
     public double intakeWristPose = 0;
     public Servo intakeWrist = null;
 
-    public double t;
-
-
-    public double r = 0;
-
-    public double kP = 0.00001;
-    public double kI = 0.4;
-    public double kD = 8;
-    public double kF = 0;
-
-    public double kG = -0.01;
-
-    public double thetaInit = Math.toRadians(-38.1176);
-    public double theta = thetaInit;
-    public double armError = 0;
-
     public Servo sweep = null;
 
-    PIDFCoefficients pidfCoeff = new PIDFCoefficients(kP, kI, kD, kF);
 
 
         @Override
@@ -154,10 +124,6 @@ public class MainCompTeleop extends LinearOpMode {
 
         sweep = hardwareMap.get(Servo.class, "sweep");
 
-        /*
-        arm1 = hardwareMap.get(CRServo.class, "arm1");
-        arm2 = hardwareMap.get(CRServo.class, "arm2");
-         */
 
         claw = hardwareMap.get(Servo.class, "claw");
 
@@ -165,23 +131,7 @@ public class MainCompTeleop extends LinearOpMode {
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setDirection(DcMotor.Direction.FORWARD);
-
-        //armMotor.setTargetPosition(armMotor.getCurrentPosition());
-
-
-        // ########################################################################################
-        // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
-        // ########################################################################################
-        // Most robots need the motors on one side to be reversed to drive forward.
-        // The motor reversals shown here are for a "direct drive" robot (the wheels turn the same direction as the motor shaft)
-        // If your robot has additional gear reductions or uses a right-angled drive, it's important to ensure
-        // that your motors are turning in the correct direction.  So, start out with the reversals here, BUT
-        // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
-        // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
-        // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-
 
 
 
@@ -201,18 +151,12 @@ public class MainCompTeleop extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        /*
-        if (opModeIsActive()) {
-            clawServo.setPosition(1);
 
-            //wrist.setPosition(0);
-        }
+        //CLOCKWISE = POSITIVE MOTOR MOVEMENT IF MOTOR IS FORWARD!!!!!
 
-        */
-
-            //CLOCKWISE = POSITIVE MOTOR MOVEMENT IF MOTOR IS FORWARD!!!!!
-
+            claw.setPosition(0);
             specWrist.setPosition(0);
+            specWrist.setPosition(0.07);
             sweep.setPosition(0);
             sweep.setPosition(0.3);
 
@@ -221,80 +165,20 @@ public class MainCompTeleop extends LinearOpMode {
             handleDrivetrain(drive);
             handleIntake();
             handleLinkages();
-            //handleArm();
+            handleArm();
             handleSweep();
-            //armMotor.setPower(gamepad2.left_stick_y);
 
-            if (arm == armPose.mid) {
-                specWrist.setPosition(0.63);
-            }
-            else if (arm == armPose.specIntake) {
-                specWrist.setPosition(0);
-            }
-
-
-            /*
-            if (gamepad2.left_bumper) {
-                armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-                armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                armMotor.setTargetPosition(-325);
-                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-
-            else if (gamepad2.right_bumper) {
-                armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-                armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                armMotor.setTargetPosition(-240);
-                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-
-             */
-
-            //base PID
-            if (gamepad2.left_bumper) {
-                armMotorTarget = -325; //just trying -250 for now.
-                armError = armMotorTarget - armMotor.getCurrentPosition();
-                armPower = kP * armError + kG * Math.cos(theta);
-                armMotor.setPower(armPower);
-            }
-            else {
-                armMotor.setPower(kG * Math.cos(theta));
-            }
-
-            armError = armMotorTarget - armMotor.getCurrentPosition();
-
-
-
-            //armMotor.setPower(1);
-
-            theta = thetaInit + (-1.0 * Math.PI * armMotor.getCurrentPosition() / 255);
-
-
-
-
-
-            telemetry.addData("arm angle degrees", Math.toDegrees(theta));
             telemetry.addData("arm power calculated", armPower);
             telemetry.addData("arm encoder pose", armMotor.getCurrentPosition());
-            telemetry.addData("arm error", armError);
-
             telemetry.addData("arm motor power", armMotor.getPower());
             telemetry.addData("actual linkage 1", linkage1.getPosition());
             telemetry.addData("actual linkage 2", linkage2.getPosition());
             telemetry.addData("wrist", specWrist.getPosition());
-            telemetry.addData("arm pose enum", arm);
-            /*
             telemetry.addData("arm motor pidf", armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
             telemetry.addData("arm motor target pos", armMotor.getTargetPosition());
-            telemetry.addData("arm motor", armMotor.getCurrentPosition());
-
-             */
-            telemetry.addData("arm target", armMotorTarget);
             telemetry.update();
 
             sleep(10);
-
-            r++;
         }
     }
 
@@ -357,10 +241,10 @@ public class MainCompTeleop extends LinearOpMode {
      */
 
     public void handleSweep() {
-        if (gamepad2.x) {
+        if (gamepad2.x) { // sweep out
             sweep.setPosition(0);
         }
-        else if (gamepad2.y) {
+        else if (gamepad2.y) { //sweep in
             sweep.setPosition(0.3);
         }
     }
@@ -370,47 +254,63 @@ public class MainCompTeleop extends LinearOpMode {
 
 
     public void handleArm() {
-        if (gamepad2.left_bumper && !leftBump) {
-            leftBump = true;
-            arm = armPose.specIntake;
+        if (gamepad2.left_bumper && armPose != 1) { //spec intake from wall
+            armPose = 1;
             claw.setPosition(0);
-//            armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-            armMotor.setTargetPosition(-337);
-//            armMotor.setTargetPosition(-190);
-
-            //specWrist.setPosition(0);
+            sleep(100);
         }
-        else if (!gamepad2.left_bumper && leftBump && !armMotor.isBusy()) {
-            leftBump = false;
-        }
-
-        if (gamepad2.right_bumper && !rightBump && arm == armPose.specIntake) {
-            rightBump = true;
-            arm = armPose.mid;
+        else if (gamepad2.right_bumper && armPose != 2) { //mid pose
+            armPose = 2;
             claw.setPosition(0.23);
-//            armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-            armMotor.setTargetPosition(-140);
-//            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            armMotor.setPower(0.5);
-            //specWrist.setPosition(0.63);
+            sleep(100);
         }
-        else if (!gamepad2.right_bumper && rightBump && !armMotor.isBusy()) {
-            rightBump = false;
+        else if (gamepad2.right_bumper && armPose == 2 && Math.abs(armMotor.getCurrentPosition() - (-1600)) <= 30) { //high pose
+            armPose = 3;
         }
-
-        if (gamepad2.right_bumper && !rightBump && arm == armPose.mid) {
-            rightBump = true;
-            arm = armPose.score;
-//            armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoeff);
-            armMotor.setTargetPosition(-96);
-//            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            armMotor.setPower(0.5);
-
+        else if (gamepad2.dpad_up || gamepad2.dpad_down) { //manual control
+            armPose = 0;
         }
 
-        else if (!gamepad2.right_bumper && rightBump && !armMotor.isBusy()) {
-            rightBump = false;
+
+        if (armPose == 1) {
+            claw.setPosition(0);
+            armTarget = -3250;
+            armMotor.setTargetPosition(armTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            specWrist.setPosition(0.07);
         }
+        else if (armPose == 2) {
+            claw.setPosition(0.23);
+            armTarget = -1600;
+            armMotor.setTargetPosition(armTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if (Math.abs(armMotor.getCurrentPosition() - (-2500)) <= 60) {
+                specWrist.setPosition(0.7);
+            }
+        }
+        else if (armPose == 3) {
+            armTarget = -1080;
+            armMotor.setTargetPosition(armTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            claw.setPosition(0.23);
+            specWrist.setPosition(0.7);
+        }
+        else if (gamepad2.dpad_down && armPose == 0) { //manual control just in case
+            armTarget += 9;
+            armMotor.setTargetPosition(armTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+        else if (gamepad2.dpad_up && armPose == 0) { //manual control just in case
+            armTarget -= 9;
+            armMotor.setTargetPosition(armTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+        else if (armPose == 0) {
+            armTarget = armMotor.getCurrentPosition();
+            armMotor.setTargetPosition(armTarget);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+        armMotor.setPower(0.5);
 
 
     }
