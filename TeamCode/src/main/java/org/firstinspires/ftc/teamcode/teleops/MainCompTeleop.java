@@ -96,7 +96,6 @@ public class MainCompTeleop extends LinearOpMode {
     public double intakePower = 0;
     public boolean intakeOn = false;
     public boolean putPieceOut = false;
-    public double intakeWristPose = 0;
     public Servo intakeWrist = null;
 
     public Servo sweep = null;
@@ -160,6 +159,9 @@ public class MainCompTeleop extends LinearOpMode {
             sweep.setPosition(0);
             sweep.setPosition(0.3);
 
+            intakeWrist.setPosition(0);
+
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             handleDrivetrain(drive);
@@ -168,12 +170,16 @@ public class MainCompTeleop extends LinearOpMode {
             handleArm();
             handleSweep();
 
+
+
             telemetry.addData("arm power calculated", armPower);
             telemetry.addData("arm encoder pose", armMotor.getCurrentPosition());
             telemetry.addData("arm motor power", armMotor.getPower());
             telemetry.addData("actual linkage 1", linkage1.getPosition());
             telemetry.addData("actual linkage 2", linkage2.getPosition());
+            telemetry.addData("actual sweep", sweep.getPosition());
             telemetry.addData("wrist", specWrist.getPosition());
+            telemetry.addData("actual intake wrist", intakeWrist.getPosition());
             telemetry.addData("arm motor pidf", armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
             telemetry.addData("arm motor target pos", armMotor.getTargetPosition());
             telemetry.update();
@@ -200,7 +206,6 @@ public class MainCompTeleop extends LinearOpMode {
 
         if (intakeOn) {
             intakePower = -1;
-            //intakeWristPose = 1;
         }
         else if (putPieceOut) {
             if (linkagePose <= 0.05 && intakePower == 1) {
@@ -212,19 +217,17 @@ public class MainCompTeleop extends LinearOpMode {
         }
         else {
             intakePower = 0;
-            //intakeWristPose = 0;
         }
 
         if (gamepad2.a) {
-            intakeWristPose = 1;
+            intakeWrist.setPosition(1);
         }
-        else if (gamepad2.b) {
-            intakeWristPose = 0;
+        if (gamepad2.b) {
+            intakeWrist.setPosition(0);
         }
 
 
         intake.setPower(intakePower);
-        intakeWrist.setPosition(intakeWristPose);
 
     }
 
@@ -257,14 +260,14 @@ public class MainCompTeleop extends LinearOpMode {
         if (gamepad2.left_bumper && armPose != 1) { //spec intake from wall
             armPose = 1;
             claw.setPosition(0);
-            sleep(100);
+            sleep(250);
         }
         else if (gamepad2.right_bumper && armPose != 2) { //mid pose
             armPose = 2;
             claw.setPosition(0.23);
-            sleep(100);
+            sleep(200);
         }
-        else if (gamepad2.right_bumper && armPose == 2 && Math.abs(armMotor.getCurrentPosition() - (-1600)) <= 30) { //high pose
+        else if (gamepad2.dpad_right && armPose == 2) { //high pose (score)
             armPose = 3;
         }
         else if (gamepad2.dpad_up || gamepad2.dpad_down) { //manual control
@@ -274,7 +277,7 @@ public class MainCompTeleop extends LinearOpMode {
 
         if (armPose == 1) {
             claw.setPosition(0);
-            armTarget = -3250;
+            armTarget = -3230;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             specWrist.setPosition(0.07);
@@ -284,12 +287,12 @@ public class MainCompTeleop extends LinearOpMode {
             armTarget = -1600;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            if (Math.abs(armMotor.getCurrentPosition() - (-2500)) <= 60) {
+            if (armMotor.getCurrentPosition() > -2000) {
                 specWrist.setPosition(0.7);
             }
         }
         else if (armPose == 3) {
-            armTarget = -1080;
+            armTarget = -700;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             claw.setPosition(0.23);
