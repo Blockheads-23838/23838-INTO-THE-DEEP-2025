@@ -324,13 +324,15 @@ public class MainCompTeleop extends LinearOpMode {
         if (linkagePose <= 0) {
             linkagePose = 0.01;
         }
-        else if (linkagePose >= 0.2) {
-            linkagePose = 0.2;
+        else if (linkagePose >= 0.235) {
+            linkagePose = 0.235;
         }
-
+        /*
         if (putPieceOut) {
             linkagePose = 0.01;
         }
+
+         */
         linkage1.setPosition(linkagePose);
         linkage2.setPosition(linkagePose);
     }

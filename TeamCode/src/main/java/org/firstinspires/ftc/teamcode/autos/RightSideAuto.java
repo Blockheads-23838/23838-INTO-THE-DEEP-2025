@@ -44,13 +44,14 @@ public class RightSideAuto extends LinearOpMode {
         }
 
         public class IntakeDeploy implements Action { //grab samples
+            private int r = 0;
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 intakeWrist.setPosition(1);
                 //MAKE SURE TO MOVE PIVOT ARM UP BEFORE MOVING LINKAGES!!!
-                linkage1.setPosition(0.2);
-                linkage2.setPosition(0.2);
-                intakeCR.setPower(-1);
+                linkage1.setPosition(0.22);
+                linkage2.setPosition(0.22);
 
                 return false;
             }
@@ -61,12 +62,13 @@ public class RightSideAuto extends LinearOpMode {
         }
 
         public class IntakeEject implements Action { //eject sample into observation zone
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 intakeWrist.setPosition(1);
-                linkage1.setPosition(0.2);
-                linkage2.setPosition(0.2);
-                intakeCR.setPower(1);
+
+                linkage1.setPosition(0.22);
+                linkage2.setPosition(0.22);
 
                 return false;
             }
@@ -80,9 +82,10 @@ public class RightSideAuto extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 intakeWrist.setPosition(0);
+
                 linkage1.setPosition(0);
                 linkage2.setPosition(0);
-                intakeCR.setPower(0);
+
 
                 return false;
             }
@@ -119,7 +122,10 @@ public class RightSideAuto extends LinearOpMode {
                     armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
                 }
-                specWrist.setPosition(0.07);
+
+                if (Math.abs(armMotor.getCurrentPosition() - (-1800)) < 50) {
+                    specWrist.setPosition(0.07);
+                }
 
                 r = r*r + 1;
 
@@ -140,11 +146,14 @@ public class RightSideAuto extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 specWrist.setPosition(0.7);
 
-                if (!initialized && r > 200) {
+                if (!initialized) {
                     armMotor.setPower(1);
                     armMotor.setTargetPosition(-720);
                     armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
+                }
+                if (Math.abs(armMotor.getCurrentPosition() - (-1800)) < 50) {
+                    specWrist.setPosition(0.7);
                 }
 
                 r = r*r + 1;
@@ -155,6 +164,56 @@ public class RightSideAuto extends LinearOpMode {
 
         public Action armScore() {
             return new ArmScore();
+        }
+
+        public class ArmUp implements Action { //for preload only!!!
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                specWrist.setPosition(0.07);
+
+                if (!initialized) {
+                    armMotor.setPower(1);
+                    armMotor.setTargetPosition(-1330);
+                    armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                r = r*r + 1;
+
+                return armMotor.isBusy();
+            }
+        }
+
+        public Action armUp() {
+            return new ArmUp();
+        }
+
+        public class ArmS implements Action { //for preload only!!!!
+            private boolean initialized = false;
+            private int r = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                specWrist.setPosition(0.07);
+
+                if (!initialized) {
+                    armMotor.setPower(1);
+                    armMotor.setTargetPosition(-700);
+                    armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    initialized = true;
+                }
+
+                r = r*r + 1;
+
+                return armMotor.isBusy();
+            }
+        }
+
+        public Action armS() {
+            return new ArmS();
         }
 
         public class ArmStow implements Action { //stow arm after auto
@@ -178,6 +237,10 @@ public class RightSideAuto extends LinearOpMode {
             }
         }
 
+        public Action armStow() {
+            return new ArmStow();
+        }
+
     }
 
 
@@ -186,24 +249,118 @@ public class RightSideAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     private Servo claw;
-
+    private Servo sweep;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         claw = hardwareMap.get(Servo.class, "claw");
+        sweep = hardwareMap.get(Servo.class, "sweep");
 
         MecanumDrive roadrunnerDrive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
 
         //INITIALIZE CLASSES HERE!!!!!
-        //DO PRE STUFF HERE (MOVE SERVOS, ETC. IF APPLICABLE!)
+        Arm arm = new Arm(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
 
         waitForStart();
 
-        //START BUILDING ACTIONS HERE; AND CALL ACTIONS AFTER!!
+        //DO PRE STUFF HERE (MOVE SERVOS, ETC. IF APPLICABLE!)
+        claw.setPosition(0.23); //closeclaw
+        sweep.setPosition(0);
+        sweep.setPosition(0.3);
+
+        //START BUILDING ACTIONS HERE
+        Action preloadSpec = roadrunnerDrive.actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+                .strafeTo(new Vector2d(68, 13))
+                .build();
+
+        Action pushTicks = roadrunnerDrive.actionBuilder(new Pose2d(68, 13, Math.toRadians(0))) //put arm in spec intake pose while running this
+                .setTangent(Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(33, -41), Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(80, -54), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(118, -66), Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(91, -78.5), Math.toRadians(-180))
+                .setTangent(Math.toRadians(-180))
+                .lineToX(27)
+                .setTangent(Math.toRadians(0))
+                .lineToX(84)
+                .splineToConstantHeading(new Vector2d(118, -92), Math.toRadians(-90))
+                .splineToConstantHeading(new Vector2d(94, -102), Math.toRadians(-180))
+                .setTangent(Math.toRadians(-180))
+                .lineToX(23)
+                .build();
+
+        Action secondSpec = roadrunnerDrive.actionBuilder(new Pose2d(23, -102, Math.toRadians(0)))
+                .setTangent(0)
+                .splineToConstantHeading(new Vector2d(68, 11.5), Math.toRadians(0))
+                .build();
 
 
+
+//        Action spike1 = roadrunnerDrive.actionBuilder(new Pose2d(68, 13, Math.toRadians(0)))
+//                .setTangent(Math.toRadians(180))
+//                .splineToSplineHeading(new Pose2d(41 , -44, Math.toRadians(-40)), Math.toRadians(-90))
+//                .build();
+//
+//        Action zone1 = roadrunnerDrive.actionBuilder(new Pose2d(41, -44, Math.toRadians(-40)))
+//                .turnTo(Math.toRadians(-155))
+//                .build();
+
+
+
+
+        //CALL ACTIONS HERE
+        Actions.runBlocking(new SequentialAction(
+                    new ParallelAction(
+                            arm.armUp(),
+                            preloadSpec
+                    ),
+                    arm.armS(),
+                    intake.intakeStow()
+                )
+        );
+
+        claw.setPosition(0); //open claw
+
+        Actions.runBlocking(
+                new ParallelAction(
+                        pushTicks,
+                        arm.armSpecIntake()
+                )
+        );
+
+        sleep(300);
+
+        Actions.runBlocking(
+                new ParallelAction (
+                        secondSpec,
+                        arm.armScore()
+                )
+
+        );
+
+        sleep(10000);
+//
+//        Actions.runBlocking(new ParallelAction(
+//                intake.intakeStow(),
+//                new SequentialAction(
+//                    spike1,
+//                    intake.intakeDeploy()
+//                )
+//        ));
+//
+//        sleep(1800);
+//
+//        Actions.runBlocking(new SequentialAction(
+//                zone1
+//        ));
+//
+//        sleep(15000);
+//
+//
+//
     }
 
 
