@@ -277,7 +277,7 @@ public class MainCompTeleop extends LinearOpMode {
 
         if (armPose == 1) {
             claw.setPosition(0);
-            armTarget = -3230;
+            armTarget = -3200;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             specWrist.setPosition(0.07);
