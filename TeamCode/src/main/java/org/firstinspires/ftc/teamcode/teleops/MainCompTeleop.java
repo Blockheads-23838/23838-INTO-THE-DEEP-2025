@@ -35,7 +35,6 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -84,19 +83,29 @@ public class MainCompTeleop extends LinearOpMode {
     public Servo specWrist = null;
     public double armPower = 0;
     public int armPose = 0;
-    public Servo claw = null;
+    public Servo specClaw = null;
 
     public DcMotorEx armMotor = null;
     public int armTarget = 0;
 
+    /*
     public boolean leftBump = false;
     public boolean rightBump = false;
 
+     */
+
+    public Servo diffLeft = null;
+    public Servo diffRight = null;
+    public Servo intakeClaw = null;
+
+    /*
     public CRServo intake = null;
     public double intakePower = 0;
     public boolean intakeOn = false;
     public boolean putPieceOut = false;
     public Servo intakeWrist = null;
+
+     */
 
     public Servo sweep = null;
 
@@ -114,19 +123,23 @@ public class MainCompTeleop extends LinearOpMode {
         linkage1 = hardwareMap.get(Servo.class, "linkage1");
         linkage2 = hardwareMap.get(Servo.class, "linkage2");
 
+        diffLeft = hardwareMap.get(Servo.class, "diffLeft");
+        diffRight = hardwareMap.get(Servo.class, "diffRight");
+        intakeClaw = hardwareMap.get(Servo.class, "intakeClaw");
 
-        intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
+
+        //intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
 
         specWrist = hardwareMap.get(Servo.class, "specWrist");
 
-        intake = hardwareMap.get(CRServo.class, "intake");
+        //intake = hardwareMap.get(CRServo.class, "intake");
 
         sweep = hardwareMap.get(Servo.class, "sweep");
 
 
-        claw = hardwareMap.get(Servo.class, "claw");
+        specClaw = hardwareMap.get(Servo.class, "specClaw");
 
-        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor"); //TEST JUST IN CASE WE NEED TO SWITCH ARM TO MOTOR!
+        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -153,35 +166,52 @@ public class MainCompTeleop extends LinearOpMode {
 
         //CLOCKWISE = POSITIVE MOTOR MOVEMENT IF MOTOR IS FORWARD!!!!!
 
-            claw.setPosition(0);
+            specClaw.setPosition(0);
             specWrist.setPosition(0);
             specWrist.setPosition(0.07);
             sweep.setPosition(0);
             sweep.setPosition(0.3);
 
-            intakeWrist.setPosition(0);
+           // intakeWrist.setPosition(0);
+
+            intakeClaw.setPosition(0); //intake claw 0 = open;
+
+            diffLeft.setPosition(0);
+            diffLeft.setPosition(1);
+            diffRight.setPosition(0);
+
+            linkage1.setPosition(0);
+            linkage2.setPosition(0);
+
 
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             handleDrivetrain(drive);
             handleIntake();
-            handleLinkages();
+
+            //handleLinkages();
             handleArm();
             handleSweep();
 
 
 
-            telemetry.addData("arm power calculated", armPower);
             telemetry.addData("arm encoder pose", armMotor.getCurrentPosition());
             telemetry.addData("arm motor power", armMotor.getPower());
+            telemetry.addData("arm pose", armPose);
+            telemetry.addData("arm motor pidf", armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+            telemetry.addData("arm motor target pos (encoder ticks)", armMotor.getTargetPosition());
+            telemetry.addData("wrist", specWrist.getPosition());
+            //telemetry.addData("actual intake wrist", intakeWrist.getPosition());
+            telemetry.addData("specClaw", specClaw.getPosition());
+
             telemetry.addData("actual linkage 1", linkage1.getPosition());
             telemetry.addData("actual linkage 2", linkage2.getPosition());
             telemetry.addData("actual sweep", sweep.getPosition());
-            telemetry.addData("wrist", specWrist.getPosition());
-            telemetry.addData("actual intake wrist", intakeWrist.getPosition());
-            telemetry.addData("arm motor pidf", armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
-            telemetry.addData("arm motor target pos", armMotor.getTargetPosition());
+            telemetry.addData("diffLeft", diffLeft.getPosition());
+            telemetry.addData("diffRight", diffRight.getPosition());
+            telemetry.addData("intakeClaw", intakeClaw.getPosition());
+
             telemetry.update();
 
             sleep(10);
@@ -189,7 +219,7 @@ public class MainCompTeleop extends LinearOpMode {
     }
 
 
-
+    /*
     public void handleIntake() {
         if (gamepad2.right_trigger > 0.2) { //intake deploy
             putPieceOut = false;
@@ -231,6 +261,8 @@ public class MainCompTeleop extends LinearOpMode {
 
     }
 
+     */
+
     /*
     public void handleClaw() {
             if (gamepad2.a) { //open
@@ -256,15 +288,16 @@ public class MainCompTeleop extends LinearOpMode {
 
 
 
+
     public void handleArm() {
         if (gamepad2.left_bumper && armPose != 1) { //spec intake from wall
             armPose = 1;
-            claw.setPosition(0);
+            specClaw.setPosition(0);
             sleep(250);
         }
         else if (gamepad2.right_bumper && armPose != 2) { //mid pose
             armPose = 2;
-            claw.setPosition(0.23);
+            specClaw.setPosition(0.23);
             sleep(200);
         }
         else if (gamepad2.dpad_right && armPose == 2) { //high pose (score)
@@ -276,14 +309,14 @@ public class MainCompTeleop extends LinearOpMode {
 
 
         if (armPose == 1) {
-            claw.setPosition(0);
+            specClaw.setPosition(0);
             armTarget = -3200;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             specWrist.setPosition(0.07);
         }
         else if (armPose == 2) {
-            claw.setPosition(0.23);
+            specClaw.setPosition(0.23);
             armTarget = -1600;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -295,7 +328,7 @@ public class MainCompTeleop extends LinearOpMode {
             armTarget = -700;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            claw.setPosition(0.23);
+            specClaw.setPosition(0.23);
             specWrist.setPosition(0.7);
         }
         else if (gamepad2.dpad_down && armPose == 0) { //manual control just in case
@@ -315,7 +348,40 @@ public class MainCompTeleop extends LinearOpMode {
         }
         armMotor.setPower(0.5);
 
+        if (gamepad2.dpad_left) {
+            armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
 
+
+    }
+
+
+    public void handleIntake() {
+        //DEPLOY + RETRACT INTAKE:
+        if (gamepad2.a) {
+            linkage1.setPosition(0.248);
+            linkage2.setPosition(0.248);
+            intakeClaw.setPosition(0);
+            diffLeft.setPosition(0.3);
+            diffRight.setPosition(0.7);
+        }
+        else if (gamepad2.b) {
+            intakeClaw.setPosition(0.23); //CHANGE TO WHATEVER CLOSES CLAW!
+            diffLeft.setPosition(1);
+            diffRight.setPosition(0);
+            linkage1.setPosition(0.01);
+            linkage2.setPosition(0.01);
+        }
+
+        //ROTATE CLAW:
+        if (gamepad2.right_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
+            diffLeft.setPosition(0.15);
+            diffRight.setPosition(0.5);
+        }
+        else if (gamepad2.left_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
+            diffLeft.setPosition(0.3);
+            diffRight.setPosition(0.7);
+        }
     }
 
 
@@ -324,8 +390,8 @@ public class MainCompTeleop extends LinearOpMode {
         if (linkagePose <= 0) {
             linkagePose = 0.01;
         }
-        else if (linkagePose >= 0.235) {
-            linkagePose = 0.235;
+        else if (linkagePose >= 0.248) {
+            linkagePose = 0.248;
         }
         /*
         if (putPieceOut) {
