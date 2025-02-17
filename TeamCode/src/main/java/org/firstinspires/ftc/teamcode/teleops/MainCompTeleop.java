@@ -358,14 +358,14 @@ public class MainCompTeleop extends LinearOpMode {
 
     public void handleIntake() {
         //DEPLOY + RETRACT INTAKE:
-        if (gamepad2.a) {
+        if (gamepad2.a) { //deploy
             linkage1.setPosition(0.248);
             linkage2.setPosition(0.248);
             intakeClaw.setPosition(0);
-            diffLeft.setPosition(0.3);
-            diffRight.setPosition(0.7);
+            diffLeft.setPosition(0.15);
+            diffRight.setPosition(0.5);
         }
-        else if (gamepad2.b) {
+        else if (gamepad2.b) { //retract
             intakeClaw.setPosition(0.23); //CHANGE TO WHATEVER CLOSES CLAW!
             diffLeft.setPosition(1);
             diffRight.setPosition(0);
@@ -375,12 +375,12 @@ public class MainCompTeleop extends LinearOpMode {
 
         //ROTATE CLAW:
         if (gamepad2.right_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
-            diffLeft.setPosition(0.15);
-            diffRight.setPosition(0.5);
-        }
-        else if (gamepad2.left_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
             diffLeft.setPosition(0.3);
             diffRight.setPosition(0.7);
+        }
+        else if (gamepad2.left_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
+            diffLeft.setPosition(0.15);
+            diffRight.setPosition(0.5);
         }
     }
 
