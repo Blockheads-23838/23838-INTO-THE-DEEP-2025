@@ -94,9 +94,11 @@ public class MainCompTeleop extends LinearOpMode {
 
      */
 
-    public Servo diffLeft = null;
-    public Servo diffRight = null;
+//    public Servo diffLeft = null;
+//    public Servo diffRight = null;
+    public Servo intakePivot = null;
     public Servo intakeClaw = null;
+    public int c = 0;
 
     /*
     public CRServo intake = null;
@@ -123,8 +125,10 @@ public class MainCompTeleop extends LinearOpMode {
         linkage1 = hardwareMap.get(Servo.class, "linkage1");
         linkage2 = hardwareMap.get(Servo.class, "linkage2");
 
-        diffLeft = hardwareMap.get(Servo.class, "diffLeft");
-        diffRight = hardwareMap.get(Servo.class, "diffRight");
+//        diffLeft = hardwareMap.get(Servo.class, "diffLeft");
+//        diffRight = hardwareMap.get(Servo.class, "diffRight");
+//
+        intakePivot = hardwareMap.get(Servo.class, "intakePivot");
         intakeClaw = hardwareMap.get(Servo.class, "intakeClaw");
 
 
@@ -175,10 +179,13 @@ public class MainCompTeleop extends LinearOpMode {
            // intakeWrist.setPosition(0);
 
             intakeClaw.setPosition(0); //intake claw 0 = open;
+            intakeClaw.setPosition(0.11); //half closed -> this will be the open position
 
-            diffLeft.setPosition(0);
-            diffLeft.setPosition(1);
-            diffRight.setPosition(0);
+//            diffLeft.setPosition(0);
+//            diffLeft.setPosition(1);
+//            diffRight.setPosition(0);
+            intakePivot.setPosition(0);
+            intakePivot.setPosition(0.28);
 
             linkage1.setPosition(0);
             linkage2.setPosition(0);
@@ -208,11 +215,14 @@ public class MainCompTeleop extends LinearOpMode {
             telemetry.addData("actual linkage 1", linkage1.getPosition());
             telemetry.addData("actual linkage 2", linkage2.getPosition());
             telemetry.addData("actual sweep", sweep.getPosition());
-            telemetry.addData("diffLeft", diffLeft.getPosition());
-            telemetry.addData("diffRight", diffRight.getPosition());
+            telemetry.addData("intake pivot", intakePivot.getPosition());
+//            telemetry.addData("diffLeft", diffLeft.getPosition());
+//            telemetry.addData("diffRight", diffRight.getPosition());
             telemetry.addData("intakeClaw", intakeClaw.getPosition());
 
             telemetry.update();
+
+            c++;
 
             sleep(10);
         }
@@ -357,51 +367,64 @@ public class MainCompTeleop extends LinearOpMode {
 
 
     public void handleIntake() {
+        if (gamepad2.right_trigger >= 0.3) {
+            intakePivot.setPosition(0.018);
+        }
         //DEPLOY + RETRACT INTAKE:
         if (gamepad2.a) { //deploy
             linkage1.setPosition(0.248);
             linkage2.setPosition(0.248);
-            intakeClaw.setPosition(0);
-            diffLeft.setPosition(0.15);
-            diffRight.setPosition(0.5);
+            intakePivot.setPosition(0.17);
+
+            if (c % 11 == 0) {
+                intakeClaw.setPosition(0.04);
+                c = 0;
+            }
+//            diffLeft.setPosition(0.15);
+//            diffRight.setPosition(0.5);
+
         }
         else if (gamepad2.b) { //retract
             intakeClaw.setPosition(0.23); //CHANGE TO WHATEVER CLOSES CLAW!
-            diffLeft.setPosition(1);
-            diffRight.setPosition(0);
-            linkage1.setPosition(0.01);
-            linkage2.setPosition(0.01);
+//            diffLeft.setPosition(1);
+//            diffRight.setPosition(0);
+            if (c % 8 == 0) {
+                intakePivot.setPosition(0.28);
+                linkage1.setPosition(0.01);
+                linkage2.setPosition(0.01);
+                c = 0;
+            }
         }
-
-        //ROTATE CLAW:
-        if (gamepad2.right_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
-            diffLeft.setPosition(0.3);
-            diffRight.setPosition(0.7);
-        }
-        else if (gamepad2.left_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
-            diffLeft.setPosition(0.15);
-            diffRight.setPosition(0.5);
-        }
+//
+//        //ROTATE CLAW:
+//        if (gamepad2.right_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
+//            diffLeft.setPosition(0.3);
+//            diffRight.setPosition(0.7);
+//        }
+//        else if (gamepad2.left_trigger >= 0.3 && linkage1.getPosition() > 0.17) {
+//            diffLeft.setPosition(0.15);
+//            diffRight.setPosition(0.5);
+//        }
     }
 
 
-    public void handleLinkages() {
-        linkagePose += -0.035*gamepad2.right_stick_y;
-        if (linkagePose <= 0) {
-            linkagePose = 0.01;
-        }
-        else if (linkagePose >= 0.248) {
-            linkagePose = 0.248;
-        }
-        /*
-        if (putPieceOut) {
-            linkagePose = 0.01;
-        }
-
-         */
-        linkage1.setPosition(linkagePose);
-        linkage2.setPosition(linkagePose);
-    }
+//    public void handleLinkages() {
+//        linkagePose += -0.035*gamepad2.right_stick_y;
+//        if (linkagePose <= 0) {
+//            linkagePose = 0.01;
+//        }
+//        else if (linkagePose >= 0.248) {
+//            linkagePose = 0.248;
+//        }
+//        /*
+//        if (putPieceOut) {
+//            linkagePose = 0.01;
+//        }
+//
+//         */
+//        linkage1.setPosition(linkagePose);
+//        linkage2.setPosition(linkagePose);
+//    }
 
 
     public void handleDrivetrain(MecanumDrive drive) {
