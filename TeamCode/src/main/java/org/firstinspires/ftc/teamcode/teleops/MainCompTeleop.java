@@ -183,9 +183,9 @@ public class MainCompTeleop extends LinearOpMode {
 
 //            diffLeft.setPosition(0);
 //            diffLeft.setPosition(1);
-//            diffRight.setPosition(0);
-            intakePivot.setPosition(0);
-            intakePivot.setPosition(0.28);
+////            diffRight.setPosition(0);
+//            intakePivot.setPosition(0);
+//            intakePivot.setPosition(0.28);
 
             linkage1.setPosition(0);
             linkage2.setPosition(0);
@@ -342,12 +342,12 @@ public class MainCompTeleop extends LinearOpMode {
             specWrist.setPosition(0.7);
         }
         else if (gamepad2.dpad_down && armPose == 0) { //manual control just in case
-            armTarget += 9;
+            armTarget += 15;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         else if (gamepad2.dpad_up && armPose == 0) { //manual control just in case
-            armTarget -= 9;
+            armTarget -= 15;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
@@ -368,12 +368,16 @@ public class MainCompTeleop extends LinearOpMode {
 
     public void handleIntake() {
         if (gamepad2.right_trigger >= 0.3) {
-            intakePivot.setPosition(0.018);
+            intakePivot.setPosition(0.009);
+        }
+        else if (gamepad2.left_trigger >= 0.3) {
+            intakePivot.setPosition(0.19);
         }
         //DEPLOY + RETRACT INTAKE:
         if (gamepad2.a) { //deploy
-            linkage1.setPosition(0.248);
-            linkage2.setPosition(0.248);
+            linkage1.setPosition(0.17);
+            linkage2.setPosition(0.17);
+            intakePivot.setPosition(0);
             intakePivot.setPosition(0.17);
 
             if (c % 11 == 0) {
@@ -388,7 +392,7 @@ public class MainCompTeleop extends LinearOpMode {
             intakeClaw.setPosition(0.23); //CHANGE TO WHATEVER CLOSES CLAW!
 //            diffLeft.setPosition(1);
 //            diffRight.setPosition(0);
-            if (c % 8 == 0) {
+            if (c % 16 == 0) {
                 intakePivot.setPosition(0.28);
                 linkage1.setPosition(0.01);
                 linkage2.setPosition(0.01);
@@ -432,8 +436,8 @@ public class MainCompTeleop extends LinearOpMode {
 
         drive.setDrivePowers(new PoseVelocity2d(
                 new Vector2d(
-                        -gamepad1.left_stick_y * powMult,
-                        -gamepad1.left_stick_x * powMult
+                        -gamepad1.left_stick_y * powMult * 10,
+                        -gamepad1.left_stick_x * powMult * 10
                 ),
                 -gamepad1.right_stick_x * powMult
         ));
