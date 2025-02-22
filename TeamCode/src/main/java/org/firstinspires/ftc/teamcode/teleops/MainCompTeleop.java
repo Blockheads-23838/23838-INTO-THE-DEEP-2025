@@ -320,7 +320,7 @@ public class MainCompTeleop extends LinearOpMode {
 
         if (armPose == 1) {
             specClaw.setPosition(0);
-            armTarget = -3200;
+            armTarget = -3210;
             armMotor.setTargetPosition(armTarget);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             specWrist.setPosition(0.07);
@@ -368,7 +368,7 @@ public class MainCompTeleop extends LinearOpMode {
 
     public void handleIntake() {
         if (gamepad2.right_trigger >= 0.3) {
-            intakePivot.setPosition(0.009);
+            intakePivot.setPosition(0);
         }
         else if (gamepad2.left_trigger >= 0.3) {
             intakePivot.setPosition(0.19);
@@ -392,7 +392,7 @@ public class MainCompTeleop extends LinearOpMode {
             intakeClaw.setPosition(0.23); //CHANGE TO WHATEVER CLOSES CLAW!
 //            diffLeft.setPosition(1);
 //            diffRight.setPosition(0);
-            if (c % 16 == 0) {
+            if (c % 20 == 0) {
                 intakePivot.setPosition(0.28);
                 linkage1.setPosition(0.01);
                 linkage2.setPosition(0.01);
@@ -432,7 +432,7 @@ public class MainCompTeleop extends LinearOpMode {
 
 
     public void handleDrivetrain(MecanumDrive drive) {
-        double powMult = gamepad1.right_trigger + 0.5;
+        double powMult = 0.5 - (gamepad1.right_trigger * 0.1);
 
         drive.setDrivePowers(new PoseVelocity2d(
                 new Vector2d(
