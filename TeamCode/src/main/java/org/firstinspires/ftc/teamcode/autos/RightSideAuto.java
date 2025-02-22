@@ -389,12 +389,12 @@ public class RightSideAuto extends LinearOpMode {
                 .waitSeconds(1)
                 .strafeTo(new Vector2d(25, -45))
                 .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(72, 21.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(72, 24), Math.toRadians(0))
                 .build();
 
-        Action park = roadrunnerDrive.actionBuilder(new Pose2d(66, 21.5, Math.toRadians(0)))
+        Action park = roadrunnerDrive.actionBuilder(new Pose2d(66, 24, Math.toRadians(0)))
                 .setTangent(180)
-                .splineToConstantHeading(new Vector2d(15, -70), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(20, -50), Math.toRadians(270))
                 .build();
 
 
