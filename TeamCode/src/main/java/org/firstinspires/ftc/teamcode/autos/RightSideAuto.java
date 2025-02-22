@@ -369,7 +369,7 @@ public class RightSideAuto extends LinearOpMode {
                  */
                 .strafeTo(new Vector2d(25, -45))
                 .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(66, 16.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(72, 16.5), Math.toRadians(0))
                 .build();
 
         Action thirdSpecPickup = roadrunnerDrive.actionBuilder(new Pose2d(66, 16.5, Math.toRadians(0)))
